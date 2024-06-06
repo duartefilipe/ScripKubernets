@@ -21,18 +21,33 @@ metadata:
     k8s-app: flannel
   name: flannel
 rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get"]
-- apiGroups: [""]
-  resources: ["nodes"]
-  verbs: ["get", "list", "watch"]
-- apiGroups: [""]
-  resources: ["nodes/status"]
-  verbs: ["patch"]
-- apiGroups: ["networking.k8s.io"]
-  resources: ["clustercidrs"]
-  verbs: ["list", "watch"]
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes/status
+  verbs:
+  - patch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - clustercidrs
+  verbs:
+  - list
+  - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -50,14 +65,6 @@ subjects:
   namespace: kube-flannel
 ---
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  labels:
-    app: flannel
-    k8s-app: flannel
-    tier: node
-  name: kube-flannel-cfg
-  namespace: kube-flannel
 data:
   cni-conf.json: |
     {
@@ -88,6 +95,14 @@ data:
       "EnableIPv6": true,
       "IPv6Network": "fc00:10:244::/56"
     }
+kind: ConfigMap
+metadata:
+  labels:
+    app: flannel
+    k8s-app: flannel
+    tier: node
+  name: kube-flannel-cfg
+  namespace: kube-flannel
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -117,7 +132,8 @@ spec:
             - matchExpressions:
               - key: kubernetes.io/os
                 operator: In
-                values: ["linux"]
+                values:
+                - linux
       containers:
       - args:
         - --ip-masq

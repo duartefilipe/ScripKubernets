@@ -91,9 +91,7 @@ data:
       "Network": "10.244.0.0/16",
       "Backend": {
         "Type": "vxlan"
-      },
-      "EnableIPv6": true,
-      "IPv6Network": "fc00:10:244::/56"
+      }
     }
 kind: ConfigMap
 metadata:

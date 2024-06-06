@@ -87,8 +87,8 @@ EOF
     #curl -OL https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
     curl -OL https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml
 
-    echo "Editando kube-flannel.yml para suporte a IPv6..."
-    sed -i '/"Backend": {/a \ \ \ \ "EnableIPv6": true,\n\ \ \ \ "IPv6Network": "fc00:10:244::/56"' kube-flannel.yml
+    #echo "Editando kube-flannel.yml para suporte a IPv6..."
+    #sed -i '/"Backend": {/a \ \ \ \ "EnableIPv6": true,\n\ \ \ \ "IPv6Network": "fc00:10:244::/56"' kube-flannel.yml
 
     echo "Aplicando configuração do Flannel..."
     kubectl apply -f kube-flannel.yml

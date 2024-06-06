@@ -84,7 +84,8 @@ EOF
     chown $(id -u):$(id -g) $HOME/.kube/config
 
     echo "Baixando e configurando o Flannel..."
-    curl -OL https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+    #curl -OL https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+    curl -OL https://github.com/duartefilipe/ScripKubernets/blob/main/kube-flannel.yaml
 
     echo "Editando kube-flannel.yml para suporte a IPv6..."
     sed -i '/"Backend": {/a \ \ \ \ "EnableIPv6": true,\n\ \ \ \ "IPv6Network": "fc00:10:244::/56"' kube-flannel.yml

@@ -1,1 +1,1 @@
-"# ScripKubernets" 
+Script instalação de um cluster kubernets em um servidor UbuntuServer 24.04

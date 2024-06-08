@@ -1,5 +1,6 @@
 #!/bin/bash
-
+cd /home/anakin
+sudo su
 # Função para verificar e configurar rede
 configurar_rede() {
     echo "Verificando informações do sistema..."
@@ -116,6 +117,8 @@ mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/localtime
 mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/dbus
 mkdir -p /home/$USER/Documentos/Server/Volumes/Grafana
 
+# Sair do modo sudo
+exit
 
 echo "Criando diretório .kube no diretório home do usuário atual..."
 mkdir -p /home/$USER/.kube

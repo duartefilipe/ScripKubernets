@@ -120,7 +120,7 @@ echo "Saindo do modo Root..."
 exit
 
 echo "Criando diretório .kube no diretório home do usuário atual..."
-mkdir -p /home/$USER/.kube
+mkdir /home/$USER/.kube
 
 echo "Copiando o arquivo de configuração do Kubernetes para o diretório .kube..."
 cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config

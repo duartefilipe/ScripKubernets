@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homeassistant
+spec:
+  replicas: 1  # Adjust as needed
+  selector:
+    matchLabels:
+      app: homeassistant
+  template:
+    metadata:
+      labels:
+        app: homeassistant
+    spec:
+      initContainers:  
+          - name: install-hacs
+            image: ubuntu:latest
+            command:
+              - "/bin/sh"
+              - "-c"
+              - "wget -q -O - https://install.hacs.xyz | sh -"
+      containers:
+      - name: homeassistant
+        image: "ghcr.io/home-assistant/home-assistant:stable"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+        - name: timezone-volume
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: dbus-volume
+          mountPath: /run/dbus
+          readOnly: true
+        securityContext:  # Address privileged mode requirement (see note below)
+          privileged: true  # Use with caution, explore alternatives if possible
+      volumes:
+      - name: config-volume
+        hostPath:
+          path: /home/anakin/Documentos/Server/Volumes/Homeassistant/Config  # Replace with your actual path
+      - name: timezone-volume
+        hostPath:
+          path: /home/anakin/Documentos/Server/Volumes/Homeassistant/localtime  # Replace if needed for custom timezone file
+      - name: dbus-volume
+        hostPath:
+          path: /home/anakin/Documentos/Server/Volumes/Homeassistant/dbus  # Replace if needed for custom dbus configuration

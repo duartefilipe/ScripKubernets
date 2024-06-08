@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-server
+spec:
+  ports:
+    - port: 10051
+      targetPort: 10051
+  selector:
+    app: zabbix-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-server
+  template:
+    metadata:
+      labels:
+        app: zabbix-server
+    spec:
+      containers:
+      - name: zabbix-server
+        image: zabbix/zabbix-server-pgsql:alpine-latest
+        env:
+        - name: POSTGRES_USER
+          value: "zabbix"
+        - name: POSTGRES_PASSWORD
+          value: "zabbix"
+        - name: DB_SERVER_HOST
+          value: "zabbix-db"
+        volumeMounts:  
+        - name: data-volume-server
+          mountPath: /data  
+      volumes:  
+      - name: data-volume-server
+        hostPath:
+          path: "/home/anakin/Documentos/Server/Volumes/Zabbix/data-volume-server"
+

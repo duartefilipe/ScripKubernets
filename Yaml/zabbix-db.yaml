@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-db
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  selector:
+    app: zabbix-db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-db
+  template:
+    metadata:
+      labels:
+        app: zabbix-db
+    spec:
+      initContainers:
+      - name: init-zabbix-db
+        image: postgres:alpine
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          if [ ! -f /var/lib/postgresql/data/.initialized ]; then
+            sudo -u postgres createuser --pwprompt zabbix
+            sudo -u postgres createdb -O zabbix -E Unicode -T template0 zabbix
+            zcat /usr/share/doc/zabbix-server-pgsql*/create.sql.gz | sudo -u zabbix psql zabbix
+            echo "DBName=zabbix" >> /etc/zabbix/zabbix_server.conf
+            echo "DBUser=zabbix" >> /etc/zabbix/zabbix_server.conf
+            echo "DBPassword=zabbix" >> /etc/zabbix/zabbix_server.conf
+            touch /var/lib/postgresql/data/.initialized
+          fi
+        volumeMounts:
+        - name: zabbix-conf
+          mountPath: /etc/zabbix
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+      containers:
+      - name: zabbix-db
+        image: postgres:latest
+        env:
+        - name: POSTGRES_USER
+          value: "zabbix"
+        - name: POSTGRES_PASSWORD
+          value: "zabbix"
+        volumeMounts:
+        - name: zabbix-conf
+          mountPath: /etc/zabbix
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: zabbix-conf
+        hostPath:
+          path: "/home/anakin/Documentos/Server/Volumes/Zabbix/zabbix-conf"
+      - name: postgres-data
+        hostPath:
+          path: "/home/anakin/Documentos/Server/Volumes/Postgres/postgres-data"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-db-external
+spec:
+  type: NodePort
+  ports:
+    - port: 5432
+      targetPort: 5432
+      nodePort: 32000 # Escolha uma porta externa disponível no seu ambiente
+  selector:
+    app: zabbix-db

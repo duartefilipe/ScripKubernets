@@ -102,19 +102,19 @@ echo "Script de configuração concluído."
 
 
 echo "Criando pastas para automação."
-mkdir /home/$USER/Documentos
-mkdir /home/$USER/Documentos/Yaml
-mkdir /home/$USER/Documentos/Server
-mkdir /home/$USER/Documentos/Server/Volumes
-mkdir /home/$USER/Documentos/Server/Volumes/Zabbix
-mkdir /home/$USER/Documentos/Server/Volumes/Zabbix/zabbix-conf
-mkdir /home/$USER/Documentos/Server/Volumes/Postgres
-mkdir /home/$USER/Documentos/Server/Volumes/Postgres/postgres-data
-mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant
-mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/Config
-mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/localtime
-mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/dbus
-mkdir /home/$USER/Documentos/Server/Volumes/Grafana
+sudo mkdir /home/$USER/Documentos
+sudo mkdir /home/$USER/Documentos/Yaml
+sudo mkdir /home/$USER/Documentos/Server
+sudo mkdir /home/$USER/Documentos/Server/Volumes
+sudo mkdir /home/$USER/Documentos/Server/Volumes/Zabbix
+sudo mkdir /home/$USER/Documentos/Server/Volumes/Zabbix/zabbix-conf
+sudo mkdir /home/$USER/Documentos/Server/Volumes/Postgres
+sudo mkdir /home/$USER/Documentos/Server/Volumes/Postgres/postgres-data
+sudo mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant
+sudo mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/Config
+sudo mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/localtime
+sudo mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/dbus
+sudo mkdir /home/$USER/Documentos/Server/Volumes/Grafana
 
 echo "Saindo do modo Root..."
 exit
@@ -123,7 +123,7 @@ echo "Criando diretório .kube no diretório home do usuário atual..."
 mkdir /home/$USER/.kube
 
 echo "Copiando o arquivo de configuração do Kubernetes para o diretório .kube..."
-cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config
+sudo cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config
 
 echo "Ajustando permissões do arquivo de configuração..."
 sudo chown $USER:$USER /home/$USER/.kube/config

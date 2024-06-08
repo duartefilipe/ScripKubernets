@@ -117,14 +117,21 @@ mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/dbus
 mkdir -p /home/$USER/Documentos/Server/Volumes/Grafana
 
 
-echo "Criando diretório .kube no diretório home do usuário atual"
+echo "Criando diretório .kube no diretório home do usuário atual..."
 mkdir -p /home/$USER/.kube
 
-echo "Copiando o arquivo de configuração do Kubernetes para o diretório .kube"
+echo "Copiando o arquivo de configuração do Kubernetes para o diretório .kube..."
+mkdir -p /home/$USER/.kube/config
 cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config
 
-echo "Mudando a propriedade do arquivo de configuração para o usuário atual"
+echo "Mudando a propriedade do arquivo de configuração para o usuário atual..."
 chown $USER:$USER /home/$USER/.kube/config
+
+# Exportar KUBECONFIG
+echo "Exportando KUBECONFIG..."
+export KUBECONFIG=/etc/kubernetes/admin.conf
+
+echo "Script finalizado por completo"
 
 echo "export KUBECONFIG"
 export KUBECONFIG=/etc/kubernetes/admin.conf

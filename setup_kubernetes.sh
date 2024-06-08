@@ -1,9 +1,4 @@
 #!/bin/bash
-# nano setup_kubernetes.sh
-# sudo su
-# chmod +x setup_kubernetes.sh
-# sudo ./setup_kubernetes.sh
-
 
 # Função para verificar e configurar rede
 configurar_rede() {
@@ -105,4 +100,21 @@ configurar_kubernetes
 
 echo "Script de configuração concluído."
 
+mkdir -p /home/anakin/Documentos
+mkdir -p /home/anakin/Documentos/Yaml
+mkdir -p /home/anakin/Documentos/Server
+mkdir -p /home/anakin/Documentos/Server/Volumes
+mkdir -p /home/anakin/Documentos/Server/Volumes/Zabbix
+mkdir -p /home/anakin/Documentos/Server/Volumes/Zabbix/zabbix-conf
+mkdir -p /home/anakin/Documentos/Server/Volumes/Postgres
+mkdir -p /home/anakin/Documentos/Server/Volumes/Postgres/postgres-data
+mkdir -p /home/anakin/Documentos/Server/Volumes/Homeassistant
+mkdir -p /home/anakin/Documentos/Server/Volumes/Homeassistant/Config
+mkdir -p /home/anakin/Documentos/Server/Volumes/Homeassistant/localtime
+mkdir -p /home/anakin/Documentos/Server/Volumes/Homeassistant/dbus
+mkdir -p /home/anakin/Documentos/Server/Volumes/Grafana
 
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+export KUBECONFIG=/etc/kubernetes/admin.conf

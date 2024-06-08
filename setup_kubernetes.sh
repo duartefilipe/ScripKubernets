@@ -116,5 +116,18 @@ mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/localtime
 mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/dbus
 mkdir -p /home/$USER/Documentos/Server/Volumes/Grafana
 
+echo "Criando diretório .kube no diretório home do usuário atual..."
+mkdir -p /home/$USER/.kube
+
+echo "Copiando o arquivo de configuração do Kubernetes para o diretório .kube..."
+cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config
+
+echo "Ajustando permissões do arquivo de configuração..."
+sudo chown $USER:$USER /home/$USER/.kube/config
+sudo chmod 644 /etc/kubernetes/admin.conf
+
+echo "Exportando KUBECONFIG..."
+export KUBECONFIG=/etc/kubernetes/admin.conf
+
 echo "Script finalizado por completo"
 

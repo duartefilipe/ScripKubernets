@@ -1,6 +1,5 @@
 #!/bin/bash
 cd /home/anakin
-sudo su
 # Função para verificar e configurar rede
 configurar_rede() {
     echo "Verificando informações do sistema..."
@@ -116,28 +115,6 @@ mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/Config
 mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/localtime
 mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/dbus
 mkdir -p /home/$USER/Documentos/Server/Volumes/Grafana
-
-# Sair do modo sudo
-exit
-
-echo "Criando diretório .kube no diretório home do usuário atual..."
-mkdir -p /home/$USER/.kube
-
-echo "Copiando o arquivo de configuração do Kubernetes para o diretório .kube..."
-mkdir -p /home/$USER/.kube/config
-cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config
-
-echo "Mudando a propriedade do arquivo de configuração para o usuário atual..."
-chown $USER:$USER /home/$USER/.kube/config
-
-# Exportar KUBECONFIG
-echo "Exportando KUBECONFIG..."
-export KUBECONFIG=/etc/kubernetes/admin.conf
-
-echo "Script finalizado por completo"
-
-echo "export KUBECONFIG"
-export KUBECONFIG=/etc/kubernetes/admin.conf
 
 echo "Script finalizado por completo"
 

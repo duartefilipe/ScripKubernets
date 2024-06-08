@@ -100,21 +100,34 @@ configurar_kubernetes
 
 echo "Script de configuração concluído."
 
-mkdir -p /home/anakin/Documentos
-mkdir -p /home/anakin/Documentos/Yaml
-mkdir -p /home/anakin/Documentos/Server
-mkdir -p /home/anakin/Documentos/Server/Volumes
-mkdir -p /home/anakin/Documentos/Server/Volumes/Zabbix
-mkdir -p /home/anakin/Documentos/Server/Volumes/Zabbix/zabbix-conf
-mkdir -p /home/anakin/Documentos/Server/Volumes/Postgres
-mkdir -p /home/anakin/Documentos/Server/Volumes/Postgres/postgres-data
-mkdir -p /home/anakin/Documentos/Server/Volumes/Homeassistant
-mkdir -p /home/anakin/Documentos/Server/Volumes/Homeassistant/Config
-mkdir -p /home/anakin/Documentos/Server/Volumes/Homeassistant/localtime
-mkdir -p /home/anakin/Documentos/Server/Volumes/Homeassistant/dbus
-mkdir -p /home/anakin/Documentos/Server/Volumes/Grafana
 
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
+echo "Criando pastas para automação."
+mkdir -p /home/$USER/Documentos
+mkdir -p /home/$USER/Documentos/Yaml
+mkdir -p /home/$USER/Documentos/Server
+mkdir -p /home/$USER/Documentos/Server/Volumes
+mkdir -p /home/$USER/Documentos/Server/Volumes/Zabbix
+mkdir -p /home/$USER/Documentos/Server/Volumes/Zabbix/zabbix-conf
+mkdir -p /home/$USER/Documentos/Server/Volumes/Postgres
+mkdir -p /home/$USER/Documentos/Server/Volumes/Postgres/postgres-data
+mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant
+mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/Config
+mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/localtime
+mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/dbus
+mkdir -p /home/$USER/Documentos/Server/Volumes/Grafana
+
+
+echo "Criando diretório .kube no diretório home do usuário atual"
+mkdir -p /home/$USER/.kube
+
+echo "Copiando o arquivo de configuração do Kubernetes para o diretório .kube"
+cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config
+
+echo "Mudando a propriedade do arquivo de configuração para o usuário atual"
+chown $USER:$USER /home/$USER/.kube/config
+
+echo "export KUBECONFIG"
 export KUBECONFIG=/etc/kubernetes/admin.conf
+
+echo "Script finalizado por completo"
+

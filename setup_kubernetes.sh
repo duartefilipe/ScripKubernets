@@ -102,19 +102,22 @@ echo "Script de configuração concluído."
 
 
 echo "Criando pastas para automação."
-mkdir -p /home/$USER/Documentos
-mkdir -p /home/$USER/Documentos/Yaml
-mkdir -p /home/$USER/Documentos/Server
-mkdir -p /home/$USER/Documentos/Server/Volumes
-mkdir -p /home/$USER/Documentos/Server/Volumes/Zabbix
-mkdir -p /home/$USER/Documentos/Server/Volumes/Zabbix/zabbix-conf
-mkdir -p /home/$USER/Documentos/Server/Volumes/Postgres
-mkdir -p /home/$USER/Documentos/Server/Volumes/Postgres/postgres-data
-mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant
-mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/Config
-mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/localtime
-mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/dbus
-mkdir -p /home/$USER/Documentos/Server/Volumes/Grafana
+mkdir /home/$USER/Documentos
+mkdir /home/$USER/Documentos/Yaml
+mkdir /home/$USER/Documentos/Server
+mkdir /home/$USER/Documentos/Server/Volumes
+mkdir /home/$USER/Documentos/Server/Volumes/Zabbix
+mkdir /home/$USER/Documentos/Server/Volumes/Zabbix/zabbix-conf
+mkdir /home/$USER/Documentos/Server/Volumes/Postgres
+mkdir /home/$USER/Documentos/Server/Volumes/Postgres/postgres-data
+mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant
+mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/Config
+mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/localtime
+mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/dbus
+mkdir /home/$USER/Documentos/Server/Volumes/Grafana
+
+echo "Saindo do modo Root..."
+exit
 
 echo "Criando diretório .kube no diretório home do usuário atual..."
 mkdir -p /home/$USER/.kube

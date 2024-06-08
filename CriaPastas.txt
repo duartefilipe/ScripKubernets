@@ -1,4 +1,5 @@
 mkdir /home/anakin/Documentos
+mkdir /home/anakin/Documentos/Yaml
 mkdir /home/anakin/Documentos/Server
 mkdir /home/anakin/Documentos/Server/Volumes
 mkdir /home/anakin/Documentos/Server/Volumes/Zabbix

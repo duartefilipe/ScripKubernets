@@ -1,7 +1,9 @@
 #!/bin/bash
 
 # Obtendo o usuário não-root atual
+echo "Obtendo o usuário não-root atual..."
 USERNAME=$(whoami)
+echo "Setando o diretorio..."
 HOME_DIR="/home/$USERNAME"
 
 # Obtendo o endereço IP da máquina

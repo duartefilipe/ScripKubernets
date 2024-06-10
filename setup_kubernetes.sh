@@ -94,7 +94,7 @@ EOF
 
 
     echo "Baixando e configurando o Flannel..."
-    sudo curl -OL https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml
+    sudo curl -OL https://raw.githubusercontent.com/duartefilipe/Automacoes/main/Kubernets/kube-flannel.yml?token=GHSAT0AAAAAACRPXEMRHV2DTUWMXUCUKR2UZTHG5KA
 
     echo "Aplicando configuração do Flannel..."
     kubectl apply -f kube-flannel.yml
@@ -127,3 +127,16 @@ echo "Criando pastas para automação..."
 criar_pastas
 
 echo "Script finalizado por completo"
+
+echo "Entrando na pasta dos Yamls"
+cd $HOME_DIR/Documentos/Yaml
+
+echo "Download dos Yamls"
+wget https://raw.githubusercontent.com/duartefilipe/Automacoes/main/Kubernets/Yaml/zabbix-db.yaml?token=GHSAT0AAAAAACRPXEMQXBF74ZEPWEDCD4Q2ZTHG6TA
+wget https://raw.githubusercontent.com/duartefilipe/Automacoes/main/Kubernets/Yaml/zabbix-frontend.yaml?token=GHSAT0AAAAAACRPXEMRWZCKPGV3SMYKYTOIZTHG6UA
+wget https://raw.githubusercontent.com/duartefilipe/Automacoes/main/Kubernets/Yaml/zabbix-server.yaml?token=GHSAT0AAAAAACRPXEMRSGGLDF3D4UXV4OFQZTHG6UQ
+
+echo "Executando os zabbix"
+kubectl apply -f zabbix-db.yaml
+kubectl apply -f zabbix-server.yaml
+kubectl apply -f zabbix-frontend.yaml

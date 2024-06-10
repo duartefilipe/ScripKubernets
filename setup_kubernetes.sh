@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Variável para o nome do usuário não-root
-USERNAME="$USER"
+# Obtendo o usuário não-root atual
+USERNAME=$(whoami)
 HOME_DIR="/home/$USERNAME"
 
 # Obtendo o endereço IP da máquina
@@ -105,15 +105,14 @@ EOF
 # Função para criar pastas e ajustar permissões
 criar_pastas() {
     echo "Criando pastas para automação..."
-    mkdir -p "$HOME_DIR/Documentos/Yaml"
-    mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Zabbix/zabbix-conf"
-    mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Postgres/postgres-data"
-    mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Homeassistant/{Config,localtime,dbus}"
-    mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Grafana"
+    mkdir -p $HOME_DIR/Documentos/Yaml
+    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Zabbix/zabbix-conf
+    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Postgres/postgres-data
+    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Homeassistant/{Config,localtime,dbus}
+    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Grafana
 
     echo "Criação de pastas concluída."
 }
-
 
 # Executando funções
 configurar_rede

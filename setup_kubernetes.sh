@@ -103,24 +103,24 @@ EOF
 # Função para criar pastas e ajustar permissões
 criar_pastas() {
     echo "Criando pastas para automação..."
-    mkdir -p $HOME_DIR/Documentos/Yaml
-    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Zabbix/zabbix-conf
-    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Postgres/postgres-data
-    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Homeassistant/{Config,localtime,dbus}
-    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Grafana
+    mkdir -p "$HOME_DIR/Documentos/Yaml"
+    mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Zabbix/zabbix-conf"
+    mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Postgres/postgres-data"
+    mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Homeassistant/{Config,localtime,dbus}"
+    mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Grafana"
 
     echo "Criando diretório .kube no diretório home do usuário atual..."
-    mkdir -p $HOME_DIR/.kube
+    mkdir -p "$HOME_DIR/.kube"
 
     echo "Copiando o arquivo de configuração do Kubernetes para o diretório .kube..."
-    sudo cp -i /etc/kubernetes/admin.conf $HOME_DIR/.kube/config
+    cp -i "/etc/kubernetes/admin.conf" "$HOME_DIR/.kube/config"
 
     echo "Ajustando permissões do arquivo de configuração..."
-    sudo chown $USERNAME:$USERNAME $HOME_DIR/.kube/config
-    sudo chmod 644 /etc/kubernetes/admin.conf
+    chown "$USERNAME:$USERNAME" "$HOME_DIR/.kube/config"
+    chmod 644 "$HOME_DIR/.kube/config"
 
     echo "Exportando KUBECONFIG..."
-    export KUBECONFIG=/etc/kubernetes/admin.conf
+    export KUBECONFIG="$HOME_DIR/.kube/config"
 
     echo "Criação de pastas concluída."
 }
@@ -131,7 +131,7 @@ configurar_kubernetes
 
 echo "Script de configuração concluído."
 
-echo "Saindo do modo Root e criando pastas para automação..."
-sudo -u $USERNAME bash -c "$(declare -f criar_pastas); criar_pastas"
+echo "Criando pastas para automação..."
+criar_pastas
 
 echo "Script finalizado por completo"

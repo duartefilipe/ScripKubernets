@@ -20,7 +20,7 @@ configurar_rede() {
     ip -br addr show
 
     echo "Verificando configuração de rede..."
-    cat /etc/netplan/50-cloud-init.yaml
+    sudo cat /etc/netplan/50-cloud-init.yaml
 
     echo "Aplicando configurações de rede..."
     echo "Descomentando net.ipv4.ip_forward e net.ipv6.conf.all.forwarding em /etc/sysctl.conf..."

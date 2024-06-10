@@ -97,10 +97,10 @@ EOF
     sudo curl -OL https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml
 
     echo "Aplicando configuração do Flannel..."
-    sudo kubectl apply -f kube-flannel.yml
+    kubectl apply -f kube-flannel.yml
 
     echo "Removendo taint do nó mestre..."
-    sudo kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
+    kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
 
     echo "Configuração do Kubernetes concluída."
 }

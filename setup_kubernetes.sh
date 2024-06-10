@@ -94,7 +94,7 @@ EOF
 
 
     echo "Baixando e configurando o Flannel..."
-    sudo curl -OL https://raw.githubusercontent.com/duartefilipe/Automacoes/main/Kubernets/kube-flannel.yml?token=GHSAT0AAAAAACRPXEMRHV2DTUWMXUCUKR2UZTHG5KA
+    sudo curl -OL https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml
 
     echo "Aplicando configuração do Flannel..."
     kubectl apply -f kube-flannel.yml

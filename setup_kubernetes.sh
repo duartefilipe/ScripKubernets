@@ -87,6 +87,8 @@ EOF
     mkdir -p $HOME_DIR/.kube
     cp -i /etc/kubernetes/admin.conf $HOME_DIR/.kube/config
     chown $(id -u):$(id -g) $HOME_DIR/.kube/config
+    export KUBECONFIG="$HOME_DIR/.kube/config"
+
 
     echo "Baixando e configurando o Flannel..."
     curl -OL https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml
@@ -108,19 +110,6 @@ criar_pastas() {
     mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Postgres/postgres-data"
     mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Homeassistant/{Config,localtime,dbus}"
     mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Grafana"
-
-    echo "Criando diretório .kube no diretório home do usuário atual..."
-    mkdir -p "$HOME_DIR/.kube"
-
-    echo "Copiando o arquivo de configuração do Kubernetes para o diretório .kube..."
-    cp -i "/etc/kubernetes/admin.conf" "$HOME_DIR/.kube/config"
-
-    echo "Ajustando permissões do arquivo de configuração..."
-    chown "$USERNAME:$USERNAME" "$HOME_DIR/.kube/config"
-    chmod 644 "$HOME_DIR/.kube/config"
-
-    echo "Exportando KUBECONFIG..."
-    export KUBECONFIG="$HOME_DIR/.kube/config"
 
     echo "Criação de pastas concluída."
 }

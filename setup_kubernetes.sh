@@ -1,5 +1,11 @@
 #!/bin/bash
-cd /home/anakin
+
+# Variável para o nome do usuário não-root
+USERNAME="anakin"
+HOME_DIR="/home/$USERNAME"
+
+cd $HOME_DIR
+
 # Função para verificar e configurar rede
 configurar_rede() {
     echo "Verificando informações do sistema..."
@@ -79,11 +85,7 @@ EOF
     chown $(id -u):$(id -g) $HOME/.kube/config
 
     echo "Baixando e configurando o Flannel..."
-    #curl -OL https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
     curl -OL https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml
-
-    #echo "Editando kube-flannel.yml para suporte a IPv6..."
-    #sed -i '/"Backend": {/a \ \ \ \ "EnableIPv6": true,\n\ \ \ \ "IPv6Network": "fc00:10:244::/56"' kube-flannel.yml
 
     echo "Aplicando configuração do Flannel..."
     kubectl apply -f kube-flannel.yml
@@ -94,42 +96,38 @@ EOF
     echo "Configuração do Kubernetes concluída."
 }
 
+# Função para criar pastas e ajustar permissões
+criar_pastas() {
+    echo "Criando pastas para automação..."
+    mkdir -p $HOME_DIR/Documentos/Yaml
+    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Zabbix/zabbix-conf
+    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Postgres/postgres-data
+    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Homeassistant/{Config,localtime,dbus}
+    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Grafana
+
+    echo "Criando diretório .kube no diretório home do usuário atual..."
+    mkdir -p $HOME_DIR/.kube
+
+    echo "Copiando o arquivo de configuração do Kubernetes para o diretório .kube..."
+    sudo cp -i /etc/kubernetes/admin.conf $HOME_DIR/.kube/config
+
+    echo "Ajustando permissões do arquivo de configuração..."
+    sudo chown $USERNAME:$USERNAME $HOME_DIR/.kube/config
+    sudo chmod 644 /etc/kubernetes/admin.conf
+
+    echo "Exportando KUBECONFIG..."
+    export KUBECONFIG=/etc/kubernetes/admin.conf
+
+    echo "Criação de pastas concluída."
+}
+
 # Executando funções
 configurar_rede
 configurar_kubernetes
 
 echo "Script de configuração concluído."
 
-echo "Saindo do modo Root..."
-exit
-
-echo "Criando pastas para automação."
-sudo mkdir /home/$USER/Documentos
-sudo mkdir /home/$USER/Documentos/Yaml
-sudo mkdir /home/$USER/Documentos/Server
-sudo mkdir /home/$USER/Documentos/Server/Volumes
-sudo mkdir /home/$USER/Documentos/Server/Volumes/Zabbix
-sudo mkdir /home/$USER/Documentos/Server/Volumes/Zabbix/zabbix-conf
-sudo mkdir /home/$USER/Documentos/Server/Volumes/Postgres
-sudo mkdir /home/$USER/Documentos/Server/Volumes/Postgres/postgres-data
-sudo mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant
-sudo mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/Config
-sudo mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/localtime
-sudo mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/dbus
-sudo mkdir /home/$USER/Documentos/Server/Volumes/Grafana
-
-echo "Criando diretório .kube no diretório home do usuário atual..."
-mkdir /home/$USER/.kube
-
-echo "Copiando o arquivo de configuração do Kubernetes para o diretório .kube..."
-sudo cp -i /etc/kubernetes/admin.conf /home/$USER/.kube/config
-
-echo "Ajustando permissões do arquivo de configuração..."
-sudo chown $USER:$USER /home/$USER/.kube/config
-sudo chmod 644 /etc/kubernetes/admin.conf
-
-echo "Exportando KUBECONFIG..."
-export KUBECONFIG=/etc/kubernetes/admin.conf
+echo "Saindo do modo Root e criando pastas para automação..."
+sudo -u $USERNAME bash -c "$(declare -f criar_pastas); criar_pastas"
 
 echo "Script finalizado por completo"
-

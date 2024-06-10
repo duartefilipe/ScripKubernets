@@ -43,3 +43,17 @@ spec:
       - name: dbus-volume
         hostPath:
           path: /home/anakin/Documentos/Server/Volumes/Homeassistant/dbus  # Replace if needed for custom dbus configuration
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homeassistant-nodeport
+spec:
+  type: NodePort
+  selector:
+    app: homeassistant
+  ports:
+    - protocol: TCP
+      port: 8123  # Porta usada pelo Home Assistant
+      targetPort: 8123  # Porta que o Home Assistant expõe
+      nodePort: 32001  # Porta no nó Kubernetes que será exposta externamente

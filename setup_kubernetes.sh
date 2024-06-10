@@ -132,9 +132,9 @@ echo "Entrando na pasta dos Yamls"
 cd $HOME_DIR/Documentos/Yaml
 
 echo "Download dos Yamls"
-wget https://raw.githubusercontent.com/duartefilipe/Automacoes/main/Kubernets/Yaml/zabbix-db.yaml?token=GHSAT0AAAAAACRPXEMQXBF74ZEPWEDCD4Q2ZTHG6TA
-wget https://raw.githubusercontent.com/duartefilipe/Automacoes/main/Kubernets/Yaml/zabbix-frontend.yaml?token=GHSAT0AAAAAACRPXEMRWZCKPGV3SMYKYTOIZTHG6UA
-wget https://raw.githubusercontent.com/duartefilipe/Automacoes/main/Kubernets/Yaml/zabbix-server.yaml?token=GHSAT0AAAAAACRPXEMRSGGLDF3D4UXV4OFQZTHG6UQ
+wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zabbix-db.yaml
+wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zabbix-frontend.yaml
+wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zabbix-server.yaml
 
 echo "Executando os zabbix"
 kubectl apply -f zabbix-db.yaml

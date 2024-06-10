@@ -41,8 +41,8 @@ spec:
         volumeMounts:
         - name: zabbix-conf
           mountPath: /etc/zabbix
-        - name: postgres-data
-          mountPath: /var/lib/postgresql/data
+        - mountPath: /var/lib/postgresql/data
+          name: postgres-data
       containers:
       - name: zabbix-db
         image: postgres:latest
@@ -51,18 +51,13 @@ spec:
           value: "zabbix"
         - name: POSTGRES_PASSWORD
           value: "zabbix"
-        volumeMounts:
-        - name: zabbix-conf
-          mountPath: /etc/zabbix
-        - name: postgres-data
-          mountPath: /var/lib/postgresql/data
       volumes:
       - name: zabbix-conf
         hostPath:
-          path: "/home/anakin/Documentos/Server/Volumes/Zabbix/zabbix-conf"
+          path: "/home/anakin/Documentos/Server/Volumes/Zabbix/Zabbix-conf"
       - name: postgres-data
         hostPath:
-          path: "/home/anakin/Documentos/Server/Volumes/Postgres/postgres-data"
+          path: "/home/anakin/Documentos/Server/Volumes/Postgresql/postgres-data"
 ---
 apiVersion: v1
 kind: Service

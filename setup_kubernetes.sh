@@ -105,11 +105,11 @@ EOF
 # Função para criar pastas e ajustar permissões
 criar_pastas() {
     echo "Criando pastas para automação..."
-    mkdir -p "$HOME_DIR/Documentos/Yaml"
-    mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Zabbix/zabbix-conf"
-    mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Postgres/postgres-data"
-    mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Homeassistant/{Config,localtime,dbus}"
-    mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Grafana"
+    mkdir -p /home/$USER/Documentos/Yaml
+    mkdir -p /home/$USER/Documentos/Server/Volumes/Zabbix/zabbix-conf
+    mkdir -p /home/$USER/Documentos/Server/Volumes/Postgres/postgres-data
+    mkdir -p /home/$USER/Documentos/Server/Volumes/Homeassistant/{Config,localtime,dbus}
+    mkdir -p /home/$USER/Documentos/Server/Volumes/Grafana
 
     echo "Criação de pastas concluída."
 }

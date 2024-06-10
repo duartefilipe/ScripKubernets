@@ -100,6 +100,8 @@ configurar_kubernetes
 
 echo "Script de configuração concluído."
 
+echo "Saindo do modo Root..."
+exit
 
 echo "Criando pastas para automação."
 sudo mkdir /home/$USER/Documentos
@@ -115,9 +117,6 @@ sudo mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/Config
 sudo mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/localtime
 sudo mkdir /home/$USER/Documentos/Server/Volumes/Homeassistant/dbus
 sudo mkdir /home/$USER/Documentos/Server/Volumes/Grafana
-
-echo "Saindo do modo Root..."
-exit
 
 echo "Criando diretório .kube no diretório home do usuário atual..."
 mkdir /home/$USER/.kube

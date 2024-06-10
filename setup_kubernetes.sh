@@ -1,8 +1,12 @@
 #!/bin/bash
 
 # Variável para o nome do usuário não-root
-USERNAME="anakin"
+USERNAME="$USER"
 HOME_DIR="/home/$USERNAME"
+
+# Obtendo o endereço IP da máquina
+IPV4=$(hostname -I | awk '{print $1}')
+IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1)
 
 cd $HOME_DIR
 
@@ -69,20 +73,20 @@ networking:
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
 localAPIEndpoint:
-  advertiseAddress: "192.168.100.44"
+  advertiseAddress: "$IPV4"
   bindPort: 6443
 nodeRegistration:
   kubeletExtraArgs:
-    node-ip: 192.168.100.44,2804:d51:4d5b:ef00:f81c:1dff:fed8:2b19
+    node-ip: $IPV4,$IPV6
 EOF
 
     echo "Inicializando Kubernetes com kubeadm..."
     kubeadm init --config=kubeadm-config.yaml
 
     echo "Configurando kubectl..."
-    mkdir -p $HOME/.kube
-    cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-    chown $(id -u):$(id -g) $HOME/.kube/config
+    mkdir -p $HOME_DIR/.kube
+    cp -i /etc/kubernetes/admin.conf $HOME_DIR/.kube/config
+    chown $(id -u):$(id -g) $HOME_DIR/.kube/config
 
     echo "Baixando e configurando o Flannel..."
     curl -OL https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml

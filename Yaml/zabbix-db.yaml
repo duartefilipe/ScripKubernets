@@ -1,6 +1,87 @@
 apiVersion: v1
 kind: Service
 metadata:
+  name: zabbix-frontend
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      nodePort: 30000
+    - name: https
+      port: 443
+      targetPort: 8443
+      nodePort: 30001
+  selector:
+    app: zabbix-frontend
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-frontend
+  template:
+    metadata:
+      labels:
+        app: zabbix-frontend
+    spec:
+      containers:
+      - name: zabbix-frontend
+        image: zabbix/zabbix-web-nginx-pgsql:latest
+        env:
+        - name: ZBX_SERVER_HOST
+          value: "zabbix-server"
+        - name: DB_SERVER_HOST
+          value: "zabbix-db"
+        - name: POSTGRES_USER
+          value: "zabbix"
+        - name: POSTGRES_PASSWORD
+          value: "zabbix"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-server
+spec:
+  ports:
+    - port: 10051
+      targetPort: 10051
+  selector:
+    app: zabbix-server
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zabbix-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zabbix-server
+  template:
+    metadata:
+      labels:
+        app: zabbix-server
+    spec:
+      containers:
+      - name: zabbix-server
+        image: zabbix/zabbix-server-pgsql:latest
+        env:
+        - name: POSTGRES_USER
+          value: "zabbix"
+        - name: POSTGRES_PASSWORD
+          value: "zabbix"
+        - name: DB_SERVER_HOST
+          value: "zabbix-db"
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: zabbix-db
 spec:
   ports:
@@ -25,24 +106,21 @@ spec:
     spec:
       initContainers:
       - name: init-zabbix-db
-        image: postgres:alpine
+        image: postgres:latest
         command: ["/bin/sh", "-c"]
         args:
         - |
-          if [ ! -f /var/lib/postgresql/data/.initialized ]; then
-            sudo -u postgres createuser --pwprompt zabbix
-            sudo -u postgres createdb -O zabbix -E Unicode -T template0 zabbix
-            zcat /usr/share/doc/zabbix-server-pgsql*/create.sql.gz | sudo -u zabbix psql zabbix
-            echo "DBName=zabbix" >> /etc/zabbix/zabbix_server.conf
-            echo "DBUser=zabbix" >> /etc/zabbix/zabbix_server.conf
-            echo "DBPassword=zabbix" >> /etc/zabbix/zabbix_server.conf
-            touch /var/lib/postgresql/data/.initialized
-          fi
+          sudo -u postgres createuser --pwprompt zabbix
+          sudo -u postgres createdb -O zabbix -E Unicode -T template0 zabbix
+          zcat /usr/share/doc/zabbix-server-pgsql/create.sql.gz | sudo -u zabbix psql zabbix
+          echo "DBName=zabbix" >> /etc/zabbix/zabbix_server.conf
+          echo "DBUser=zabbix" >> /etc/zabbix/zabbix_server.conf
+          echo "DBPassword=zabbix" >> /etc/zabbix/zabbix_server.conf
         volumeMounts:
         - name: zabbix-conf
           mountPath: /etc/zabbix
-        - mountPath: /var/lib/postgresql/data
-          name: postgres-data
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
       containers:
       - name: zabbix-db
         image: postgres:latest
@@ -51,23 +129,15 @@ spec:
           value: "zabbix"
         - name: POSTGRES_PASSWORD
           value: "zabbix"
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
       volumes:
       - name: zabbix-conf
-        hostPath:
-          path: "/home/anakin/Documentos/Server/Volumes/Zabbix/Zabbix-conf"
+        emptyDir: {}
       - name: postgres-data
-        hostPath:
-          path: "/home/anakin/Documentos/Server/Volumes/Postgresql/postgres-data"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: zabbix-db-external
-spec:
-  type: NodePort
-  ports:
-    - port: 5432
-      targetPort: 5432
-      nodePort: 32000 # Escolha uma porta externa disponível no seu ambiente
-  selector:
-    app: zabbix-db
+
+
+
+
+

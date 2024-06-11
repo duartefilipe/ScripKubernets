@@ -32,4 +32,4 @@ spec:
         - name: POSTGRES_PASSWORD
           value: "zabbix"
         - name: DB_SERVER_HOST
-          value: "zabbix-db"
+          value: "zabbix-db-internal"

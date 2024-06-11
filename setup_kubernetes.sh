@@ -141,6 +141,7 @@ wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zab
 wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zabbix-server.yaml
 wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/grafana.yaml
 wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/jellyfin.yaml
+wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/homeassistant.yaml
 
 echo "Executando os zabbix"
 kubectl apply -f zabbix-db.yaml
@@ -148,3 +149,6 @@ kubectl apply -f zabbix-server.yaml
 kubectl apply -f zabbix-frontend.yaml
 kubectl apply -f grafana.yaml
 kubectl apply -f jellyfin.yaml
+kubectl apply -f homeassistant.yaml
+
+echo "...................Finalizado................"

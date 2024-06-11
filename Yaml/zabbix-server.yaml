@@ -40,4 +40,3 @@ spec:
       - name: data-volume-server
         hostPath:
           path: "/home/anakin/Documentos/Server/Volumes/Zabbix/data-volume-server"
-

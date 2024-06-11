@@ -131,12 +131,17 @@ echo "Script finalizado por completo"
 echo "Entrando na pasta dos Yamls"
 cd $HOME_DIR/Documentos/Yaml
 
+echo "Dando permissoes para as pastas"
+sudo chmod 777 -R /home/anakin/Documentos
+
 echo "Download dos Yamls"
 wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zabbix-db.yaml
 wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zabbix-frontend.yaml
 wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zabbix-server.yaml
+wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/grafana.yaml
 
 echo "Executando os zabbix"
 kubectl apply -f zabbix-db.yaml
 kubectl apply -f zabbix-server.yaml
 kubectl apply -f zabbix-frontend.yaml
+kubectl apply -f grafana.yaml

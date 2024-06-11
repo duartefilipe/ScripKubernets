@@ -37,7 +37,7 @@ spec:
         - name: ZBX_SERVER_HOST
           value: "zabbix-server"
         - name: DB_SERVER_HOST
-          value: "zabbix-db"
+          value: "zabbix-db-internal"
         - name: POSTGRES_USER
           value: "zabbix"
         - name: POSTGRES_PASSWORD

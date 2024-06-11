@@ -113,6 +113,7 @@ criar_pastas() {
     mkdir -p $HOME_DIR/Documentos/Server/Volumes/Postgres/postgres-data
     mkdir -p $HOME_DIR/Documentos/Server/Volumes/Homeassistant/{Config,localtime,dbus}
     mkdir -p $HOME_DIR/Documentos/Server/Volumes/Grafana
+    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Jellyfin/{Config,FilmesSeries}
 
     echo "Criação de pastas concluída."
 }
@@ -139,9 +140,11 @@ wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zab
 wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zabbix-frontend.yaml
 wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zabbix-server.yaml
 wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/grafana.yaml
+wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/jellyfin.yaml
 
 echo "Executando os zabbix"
 kubectl apply -f zabbix-db.yaml
 kubectl apply -f zabbix-server.yaml
 kubectl apply -f zabbix-frontend.yaml
 kubectl apply -f grafana.yaml
+kubectl apply -f jellyfin.yaml

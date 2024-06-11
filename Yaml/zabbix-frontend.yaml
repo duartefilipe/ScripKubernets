@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
       - name: zabbix-frontend
-        image: zabbix/zabbix-web-nginx-pgsql:alpine-latest
+        image: zabbix/zabbix-web-nginx-pgsql:latest
         env:
         - name: ZBX_SERVER_HOST
           value: "zabbix-server"
@@ -42,10 +42,3 @@ spec:
           value: "zabbix"
         - name: POSTGRES_PASSWORD
           value: "zabbix"
-        volumeMounts:  
-        - name: data-volume-front
-          mountPath: /data  
-      volumes:  
-      - name: data-volume-front
-        hostPath:
-          path: "/home/anakin/Documentos/Server/Volumes/Zabbix/data-volume-front"

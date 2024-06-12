@@ -1,0 +1,83 @@
+zabbix_export:
+  version: '7.0'
+  host_groups:
+    - uuid: 0dca6fc2b2894dcab15dfa64a4c288b9
+      name: Desktops
+    - uuid: dc579cd7a1a34222933f24f52a68bcd8
+      name: 'Linux servers'
+    - uuid: eba1e0d7c82744aa91454165690d1799
+      name: 'Todos Hosts'
+    - uuid: 6f6799aa69e844b4b3918f779f2abf08
+      name: 'Zabbix servers'
+  hosts:
+    - host: ANAKIN
+      name: ANAKIN
+      templates:
+        - name: 'Windows by Zabbix agent'
+      groups:
+        - name: Desktops
+        - name: 'Todos Hosts'
+      interfaces:
+        - ip: 192.168.100.19
+          interface_ref: if1
+      macros:
+        - macro: '{$LATITUDE}'
+          value: '-30.902667117797055'
+        - macro: '{$LONGITUDE}'
+          value: '-55.54145717068127'
+      inventory:
+        location_lat: '-30.902667117797'
+        location_lon: '-55.541457170681'
+      inventory_mode: AUTOMATIC
+    - host: Notebook
+      name: Notebook
+      templates:
+        - name: 'Linux by Zabbix agent'
+      groups:
+        - name: Desktops
+        - name: 'Todos Hosts'
+      interfaces:
+        - ip: 192.168.100.136
+          interface_ref: if1
+      macros:
+        - macro: '{$LATITUDE}'
+          value: '-29.758775580894913'
+        - macro: '{$LONGITUDE}'
+          value: '-57.08709589709726'
+      inventory:
+        location_lat: '-29.758775580894'
+        location_lon: '-57.087095897097'
+      inventory_mode: AUTOMATIC
+    - host: proxmox
+      name: proxmox
+      templates:
+        - name: 'Linux by Zabbix agent'
+      groups:
+        - name: 'Linux servers'
+        - name: 'Todos Hosts'
+      interfaces:
+        - ip: 192.168.100.37
+          interface_ref: if1
+      macros:
+        - macro: '{$LATITUDE}'
+          value: '-29.684116496530656'
+        - macro: '{$LONGITUDE}'
+          value: '-53.79566775959041'
+      inventory:
+        location_lat: '-29.684116496530'
+        location_lon: '-53.795667759590'
+      inventory_mode: AUTOMATIC
+    - host: 'Zabbix server'
+      name: 'Zabbix server'
+      status: DISABLED
+      templates:
+        - name: 'Linux by Zabbix agent'
+        - name: 'Zabbix server health'
+      groups:
+        - name: 'Zabbix servers'
+      interfaces:
+        - interface_ref: if1
+      inventory:
+        location_lat: '56.95387'
+        location_lon: '24.22067'
+      inventory_mode: AUTOMATIC

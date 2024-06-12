@@ -41,4 +41,11 @@ spec:
         - name: POSTGRES_USER
           value: "zabbix"
         - name: POSTGRES_PASSWORD
-          value: "zabbix"
+          value: "Zabbix"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"

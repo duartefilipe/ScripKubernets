@@ -33,3 +33,4 @@ spec:
           value: "zabbix"
         - name: DB_SERVER_HOST
           value: "zabbix-db-internal"
+  

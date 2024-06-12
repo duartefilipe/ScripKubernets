@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pihole
+  name: pihole-deployment
 spec:
-  replicas: 1
+  replicas: 1  # Defina o número desejado de réplicas
   selector:
     matchLabels:
       app: pihole
@@ -12,65 +12,32 @@ spec:
       labels:
         app: pihole
     spec:
-      hostNetwork: true
-      dnsPolicy: "None"
-      dnsConfig:
-        nameservers:
-          # upstream DNS used by pihole.
-          - 8.8.8.8
       containers:
-        - name: pihole
-          # https://hub.docker.com/r/pihole/pihole/tags
-          image: pihole/pihole:latest
-          imagePullPolicy: IfNotPresent
-          env:
-            - name: TZ
-              value: "America/Los_Angeles"
-            - name: WEBPASSWORD
-              value: Eunaoseiasenha22
-          securityContext:
-            privileged: true
-          ports:
-            - containerPort: 53
-              protocol: TCP
-            - containerPort: 53
-              protocol: UDP
-            - containerPort: 67
-              protocol: UDP
-            - containerPort: 80
-              protocol: TCP
-            - containerPort: 443
-              protocol: TCP
-          volumeMounts:
-            - name: etc
-              mountPath: /etc/pihole
-            - name: dnsmasq
-              mountPath: /etc/dnsmasq.d
-          resources:
-            requests:
-              memory: 128Mi
-              cpu: 100m
-            limits:
-              memory: 2Gi
-              cpu: 1
-      volumes:
-        - name: etc
-          hostPath:
-            path: /home/anakin/Documentos/Server/Volumes/Pihole/etc
-            type: Directory
-        - name: dnsmasq
-          hostPath:
-            path: /home/anakin/Documentos/Server/Volumes/Pihole/dnsmasq.d
-            type: Directory
+      - name: pihole
+        image: pihole/pihole:latest
+        env:
+        - name: WEBPASSWORD
+          value: "Eunaoseiasenha22"  # Defina sua senha aqui
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "20Mi"
+          limits:
+            cpu: "50m"
+            memory: "100Mi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: pihole-service
 spec:
-  ports:
-    - port: 80
-      targetPort: 80
+  type: NodePort
   selector:
     app: pihole
-  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 82
+    targetPort: 80
+    nodePort: 30005

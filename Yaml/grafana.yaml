@@ -55,13 +55,6 @@ spec:
         args:
         - >
           grafana cli plugins install alexanderzobnin-zabbix-app && /run.sh
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
       volumes:
       - name: grafana-data
         persistentVolumeClaim:
@@ -79,4 +72,4 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 3000
-    nodePort: 30003
+    nodePort: 31003

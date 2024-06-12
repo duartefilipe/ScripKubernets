@@ -1,47 +1,53 @@
 apiVersion: v1
 kind: Service
 metadata:
- name: jellyfin-service
+  name: jellyfin-service
 spec:
- selector:
-   app: jellyfin
- ports:
-   - protocol: TCP
-     port: 8096
-     targetPort: 8096
-     nodePort: 30005
- type: NodePort
+  selector:
+    app: jellyfin
+  ports:
+    - protocol: TCP
+      port: 8096
+      targetPort: 8096
+      nodePort: 30005
+  type: NodePort
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
- name: jellyfin-deployment
+  name: jellyfin-deployment
 spec:
- replicas: 1
- selector:
-   matchLabels:
-     app: jellyfin
- template:
-   metadata:
-     labels:
-       app: jellyfin
-   spec:
-     containers:
-       - name: jellyfin
-         image: jellyfin/jellyfin:latest
-         ports:
-           - containerPort: 8096
-             protocol: TCP
-         volumeMounts:
-           - name: filmes-series-volume
-             mountPath: /media/FilmesSeries
-           - name: jellyfin-config-volume
-             mountPath: /config
-     volumes:
-       - name: filmes-series-volume
-         hostPath:
-           path: "/home/anakin/Documentos/Server/Volumes/Jellyfin/FilmesSeries"
-       - name: jellyfin-config-volume
-         hostPath:
-           path: "/home/anakin/Documentos/Server/Volumes/Jellyfin/Config"
-
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      containers:
+      - name: jellyfin
+        image: jellyfin/jellyfin:latest
+        ports:
+          - containerPort: 8096
+            protocol: TCP
+        volumeMounts:
+          - name: filmes-series-volume
+            mountPath: /media/FilmesSeries
+          - name: jellyfin-config-volume
+            mountPath: /config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: filmes-series-volume
+        hostPath:
+          path: "/home/anakin/Documentos/Server/Volumes/Jellyfin/FilmesSeries"
+      - name: jellyfin-config-volume
+        hostPath:
+          path: "/home/anakin/Documentos/Server/Volumes/Jellyfin/Config"

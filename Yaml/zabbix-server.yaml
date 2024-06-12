@@ -33,10 +33,10 @@ spec:
           value: "zabbix"
         - name: DB_SERVER_HOST
           value: "zabbix-db-internal"
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+#     resources:
+#       requests:
+#          memory: "256Mi"
+#           cpu: "200m"
+#          limits:
+#            memory: "512Mi"
+#            cpu: "500m"

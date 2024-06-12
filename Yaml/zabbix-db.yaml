@@ -65,9 +65,6 @@ spec:
   ports:
     - port: 5432
       targetPort: 5432
-      nodePort: 32000 # Escolha uma porta externa disponível no seu ambiente
+      nodePort: 30002
   selector:
     app: zabbix-db
-
-
-

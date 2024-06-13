@@ -18,6 +18,9 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
         - |
+          if [ -f /var/lib/postgresql/data/postmaster.pid ]; then
+            rm /var/lib/postgresql/data/postmaster.pid
+          fi
           sudo -u postgres createuser --pwprompt zabbix
           sudo -u postgres createdb -O zabbix -E Unicode -T template0 zabbix
           zcat /usr/share/doc/zabbix-server-pgsql/create.sql.gz | sudo -u zabbix psql zabbix

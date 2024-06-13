@@ -43,13 +43,13 @@ spec:
         volumeMounts:
         - name: postgres-data
           mountPath: /var/lib/postgresql/data
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+#        resources:
+#          requests:
+#            memory: "128Mi"
+#            cpu: "100m"
+#          limits:
+#            memory: "512Mi"
+#            cpu: "500m"
       volumes:
       - name: zabbix-conf
         emptyDir: {}

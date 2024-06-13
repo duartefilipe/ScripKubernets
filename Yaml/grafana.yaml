@@ -46,6 +46,13 @@ spec:
       containers:
       - name: grafana
         image: grafana/grafana:latest
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
         ports:
         - containerPort: 3000
         volumeMounts:
@@ -54,7 +61,7 @@ spec:
         command: ["sh", "-c"]
         args:
         - >
-          grafana cli plugins install alexanderzobnin-zabbix-app && /run.sh
+          grafana-cli plugins install alexanderzobnin-zabbix-app && /run.sh
       volumes:
       - name: grafana-data
         persistentVolumeClaim:
@@ -72,4 +79,4 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 3000
-    nodePort: 31003
+    nodePort: 30003

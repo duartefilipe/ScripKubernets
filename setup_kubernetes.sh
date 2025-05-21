@@ -56,6 +56,17 @@ instalar_kubernetes() {
   sudo kubeadm config images pull
 }
 
+limpar_instalacao_anterior() {
+  echo "🧹 Limpando instalação anterior (se houver)..."
+  sudo kubeadm reset -f || true
+  sudo systemctl stop kubelet || true
+  sudo rm -rf /etc/kubernetes /var/lib/etcd /var/lib/kubelet /etc/cni /opt/cni
+  sudo ip link delete cni0 || true
+  sudo ip link delete flannel.1 || true
+  sudo systemctl restart containerd
+  echo "✅ Limpeza concluída."
+}
+
 configurar_kubernetes() {
   echo "📝 Criando kubeadm-config.yaml..."
   cat <<EOF > kubeadm-config.yaml
@@ -103,7 +114,7 @@ criar_pastas() {
 aplicar_yamls() {
   echo "⬇️ Baixando YAMLs..."
   cd "$HOME_DIR/Documentos/Yaml"
-  for file in zabbix-db.yaml zabbix-frontend.yaml zabbix-server.yaml grafana.yaml jellyfin.yaml homeassistant.yaml; do
+  for file in zabbix-db.yaml zabbix-frontend.yaml zabbix-server.yaml grafana.yaml jellyfin.yaml homeassistant.yaml pihole.yaml; do
     wget -q "https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/$file"
   done
   wget -q "https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml"
@@ -123,8 +134,9 @@ ajustar_hora
 configurar_rede
 instalar_containerd
 instalar_kubernetes
+limpar_instalacao_anterior
 configurar_kubernetes
 criar_pastas
 aplicar_yamls
 
-echo "✅ Kubernetes instalado e serviços aplicados com sucesso!"
+echo "✅ Kubernetes instalado e todos os serviços (Zabbix, Grafana, Jellyfin, Home Assistant, Pi-hole) aplicados com sucesso!"

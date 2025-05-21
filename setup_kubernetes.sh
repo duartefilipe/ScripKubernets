@@ -174,3 +174,6 @@ criar_pastas
 aplicar_yamls
 
 echo "✅ Kubernetes instalado e todos os serviços (Zabbix, Grafana, Jellyfin, Home Assistant, Pi-hole) aplicados com sucesso!"
+echo "♻️ Reinicializando o servidor em 10 segundos para garantir estabilidade do cluster..."
+sleep 10
+sudo reboot

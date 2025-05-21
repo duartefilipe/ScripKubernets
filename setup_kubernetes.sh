@@ -13,7 +13,11 @@ cd "$HOME_DIR"
 ajustar_hora() {
   echo "⏱️ Verificando sincronização de data/hora..."
   sudo timedatectl set-ntp true
-  timedatectl status | grep "NTP synchronized"
+  if timedatectl status | grep -q "NTP synchronized: yes"; then
+    echo "✅ NTP sincronizado corretamente."
+  else
+    echo "⚠️ NTP ainda não sincronizado, mas continuando."
+  fi
 }
 
 configurar_rede() {

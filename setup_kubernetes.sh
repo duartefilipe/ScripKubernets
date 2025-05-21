@@ -10,15 +10,25 @@ IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1)
 
 cd "$HOME_DIR"
 
-  sudo apt install -y ntpdate
+ajustar_hora() {
+  echo "🕒 Tentando instalar ntpdate mesmo com possíveis erros de hora..."
+
+  # Tenta baixar diretamente o pacote se apt update falhar
+  if ! command -v ntpdate &>/dev/null; then
+    sudo apt install -y ntpdate || {
+      echo "⚠️ Falha ao instalar ntpdate via apt. Forçando download direto..."
+      sudo apt-get install -o Acquire::Check-Valid-Until=false -y ntpdate || {
+        echo "❌ Falha crítica: não foi possível instalar o ntpdate."
+        exit 1
+      }
+    }
+  fi
+
+  echo "🕒 Sincronizando horário com pool.ntp.org..."
   sudo systemctl stop systemd-timesyncd || true
   sudo ntpdate -u pool.ntp.org || echo "⚠️ Falha ao sincronizar com pool.ntp.org"
   sudo systemctl start systemd-timesyncd || true
 
-ajustar_hora() {
-  sudo apt update
-  echo "🕒 Forçando sincronização do horário com pool.ntp.org..."
-  
   echo "⏱️ Verificando status do NTP..."
   sudo timedatectl set-ntp true >/dev/null 2>&1 || sudo dbus-send --system \
     --print-reply --dest=org.freedesktop.timedate1 \
@@ -29,7 +39,11 @@ ajustar_hora() {
   else
     echo "⚠️ NTP ainda não sincronizado. Continuando mesmo assim..."
   fi
+
+  echo "⬆️ Atualizando pacotes após correção de horário..."
+  sudo apt update
 }
+
 
 configurar_rede() {
   echo "📡 Configurando rede e kernel..."

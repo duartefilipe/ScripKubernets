@@ -12,9 +12,19 @@ cd "$HOME_DIR"
 
 ajustar_hora() {
   echo "⏱️ Corrigindo data/hora do sistema..."
-  sudo timedatectl set-ntp true
+
+  # Desativa NTP temporariamente para permitir ajuste de hora
+  sudo timedatectl set-ntp false
+
+  # Define a hora UTC atual
   sudo timedatectl set-time "$(date -u +'%Y-%m-%d %H:%M:%S')"
+
+  # Reativa NTP após o ajuste
+  sudo timedatectl set-ntp true
+
+  echo "🕒 Hora ajustada com sucesso."
 }
+
 
 configurar_rede() {
   echo "📡 Configurando rede e kernel..."

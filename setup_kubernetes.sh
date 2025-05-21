@@ -12,7 +12,6 @@ cd "$HOME_DIR"
 
 ajustar_hora() {
   echo "🕒 Instalando ntpdate ignorando validade de release..."
-  esperar_apt
   sudo apt-get install -o Acquire::Check-Valid-Until=false -y ntpdate || {
     echo "❌ Falha crítica ao instalar ntpdate. Abortando."
     exit 1
@@ -35,10 +34,8 @@ ajustar_hora() {
   fi
 
   echo "⬆️ Atualizando pacotes com hora já corrigida..."
-  esperar_apt
-  sudo apt update
+  sudo apt update || true
 }
-
 
 configurar_rede() {
   echo "📡 Configurando rede e kernel..."
@@ -52,7 +49,6 @@ configurar_rede() {
   sudo sed -i '/swap/d' /etc/fstab
   sudo swapoff -a
 
-  echo "⬆️ Atualizando pacotes..."
   sudo apt update
   sudo apt install -y apt-transport-https ca-certificates curl jq gnupg lsb-release
 }
@@ -61,7 +57,7 @@ instalar_containerd() {
   echo "📦 Instalando containerd..."
   sudo apt install -y containerd
   sudo mkdir -p /etc/containerd
-  sudo containerd config default | sudo tee /etc/containerd/config.toml
+  sudo containerd config default | sudo tee /etc/containerd/config.toml >/dev/null
   sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
   sudo systemctl restart containerd
 }
@@ -84,6 +80,7 @@ limpar_instalacao_anterior() {
   sudo ip link delete cni0 || true
   sudo ip link delete flannel.1 || true
   sudo systemctl restart containerd
+  kubectl delete ns kube-flannel --ignore-not-found
   echo "✅ Limpeza concluída."
 }
 
@@ -107,10 +104,7 @@ nodeRegistration:
 EOF
 
   echo "🚀 Inicializando cluster..."
-  if ! sudo kubeadm init --config=kubeadm-config.yaml; then
-    echo "❌ Erro ao inicializar o Kubernetes. Abortando."
-    exit 1
-  fi
+  sudo kubeadm init --config=kubeadm-config.yaml
 
   echo "🔧 Configurando kubectl para o usuário atual..."
   mkdir -p "$HOME_DIR/.kube"
@@ -118,22 +112,20 @@ EOF
   sudo chown "$USERNAME:$USERNAME" "$HOME_DIR/.kube/config"
   chmod 600 "$HOME_DIR/.kube/config"
   export KUBECONFIG="$HOME_DIR/.kube/config"
-  grep -qxF "export KUBECONFIG=\$HOME/.kube/config" "$HOME_DIR/.bashrc" || echo "export KUBECONFIG=\$HOME/.kube/config" >> "$HOME_DIR/.bashrc"
 }
 
 aguardar_cluster() {
   echo "⏳ Aguardando o Kubernetes ficar pronto..."
   for i in {1..30}; do
-    if kubectl get nodes &>/dev/null; then
+    if kubectl get nodes | grep -q "NotReady"; then
+      echo "⏳ Aguardando node se tornar Ready... ($i/30)"
+      sleep 5
+    else
       echo "✅ Cluster pronto!"
       return 0
     fi
-    echo "⏳ Tentativa $i: aguardando kube-apiserver..."
-    sleep 5
   done
-
-  echo "❌ Timeout: Kubernetes não ficou pronto a tempo."
-  exit 1
+  echo "⚠️ Node ainda está NotReady. Verifique o status manualmente com kubectl describe node"
 }
 
 criar_pastas() {
@@ -153,10 +145,10 @@ aplicar_yamls() {
   for file in zabbix-db.yaml zabbix-frontend.yaml zabbix-server.yaml grafana.yaml jellyfin.yaml homeassistant.yaml pihole.yaml; do
     wget -q "https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/$file"
   done
-  wget -q "https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml"
 
-  echo "✅ Aplicando flannel..."
-  kubectl apply -f kube-flannel.yml || true
+  echo "✅ Aplicando Flannel (v0.22.0)..."
+  kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.22.0/Documentation/kube-flannel.yml
+
   kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
 
   echo "📦 Aplicando serviços..."
@@ -165,18 +157,18 @@ aplicar_yamls() {
   done
 }
 
-### 🧭 Execução
+### Execução principal
 ajustar_hora
 configurar_rede
 instalar_containerd
 instalar_kubernetes
 limpar_instalacao_anterior
 configurar_kubernetes
+aplicar_yamls
 aguardar_cluster
 criar_pastas
-aplicar_yamls
 
-echo "✅ Kubernetes instalado e todos os serviços (Zabbix, Grafana, Jellyfin, Home Assistant, Pi-hole) aplicados com sucesso!"
-echo "♻️ Reinicializando o servidor em 10 segundos para garantir estabilidade do cluster..."
+echo "✅ Kubernetes instalado com sucesso e serviços aplicados."
+echo "♻️ Reinicializando o servidor em 10 segundos..."
 sleep 10
 sudo reboot

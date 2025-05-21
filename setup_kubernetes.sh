@@ -11,19 +11,17 @@ IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1)
 cd "$HOME_DIR"
 
 ajustar_hora() {
-  echo "⏱️ Verificando sincronização de data/hora..."
+  echo "⏱️ Sincronizando data/hora com servidores NTP..."
+  sudo apt update
+  sudo apt install -y ntpdate
+  sudo ntpdate pool.ntp.org || echo "⚠️ Falha ao sincronizar com pool.ntp.org. Verifique a conexão."
   sudo timedatectl set-ntp true
-  if timedatectl status | grep -q "NTP synchronized: yes"; then
-    echo "✅ NTP sincronizado corretamente."
-  else
-    echo "⚠️ NTP ainda não sincronizado, mas continuando."
-  fi
+  timedatectl status | grep "NTP synchronized"
 }
 
 configurar_rede() {
   echo "📡 Configurando rede e kernel..."
 
-  # Cria sysctl.conf se não existir
   [ -f /etc/sysctl.conf ] || sudo touch /etc/sysctl.conf
 
   sudo grep -q '^net.ipv4.ip_forward=1' /etc/sysctl.conf || echo 'net.ipv4.ip_forward=1' | sudo tee -a /etc/sysctl.conf

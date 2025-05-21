@@ -12,6 +12,7 @@ Após a execução do script, os seguintes serviços são configurados e executa
 - [x] **Grafana** – Visualização de métricas
 - [x] **Home Assistant** – Automação residencial
 - [x] **Jellyfin** – Servidor de mídia local
+- [x] **Pihole** – Servidor DNS
 
 ---
 

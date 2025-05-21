@@ -10,16 +10,15 @@ IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1)
 
 cd "$HOME_DIR"
 
-ajustar_hora() {
-  echo "🕒 Instalando ntpdate para sincronização de horário..."
-  sudo apt update
   sudo apt install -y ntpdate
-
-  echo "🕒 Forçando sincronização do horário com pool.ntp.org..."
   sudo systemctl stop systemd-timesyncd || true
   sudo ntpdate -u pool.ntp.org || echo "⚠️ Falha ao sincronizar com pool.ntp.org"
   sudo systemctl start systemd-timesyncd || true
 
+ajustar_hora() {
+  sudo apt update
+  echo "🕒 Forçando sincronização do horário com pool.ntp.org..."
+  
   echo "⏱️ Verificando status do NTP..."
   sudo timedatectl set-ntp true >/dev/null 2>&1 || sudo dbus-send --system \
     --print-reply --dest=org.freedesktop.timedate1 \

@@ -1,72 +1,62 @@
 #!/bin/bash
+set -e
 
-# Obtendo o usuário não-root atual
-echo "Obtendo o usuário não-root atual..."
+echo "===== Iniciando configuração Kubernetes ====="
+
 USERNAME=$(whoami)
-echo "Setando o diretorio..."
 HOME_DIR="/home/$USERNAME"
-
-# Obtendo o endereço IP da máquina
 IPV4=$(hostname -I | awk '{print $1}')
 IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1)
 
-cd $HOME_DIR
+cd "$HOME_DIR"
 
-# Função para verificar e configurar rede
-configurar_rede() {
-    echo "Verificando informações do sistema..."
-    lsb_release -a
-    uname -a
-    ip -br addr show
-
-    echo "Verificando configuração de rede..."
-    sudo cat /etc/netplan/50-cloud-init.yaml
-
-    echo "Aplicando configurações de rede..."
-    echo "Descomentando net.ipv4.ip_forward e net.ipv6.conf.all.forwarding em /etc/sysctl.conf..."
-    sudo sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
-    sudo sed -i 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/' /etc/sysctl.conf
-    sudo sysctl -p
-
-    echo "Desativando swap..."
-    sudo sed -i '/swap/d' /etc/fstab
-    sudo swapoff -a
-    free -m
-
-    echo "Atualizando o sistema..."
-    sudo apt update && sudo apt upgrade -y
-    sudo apt install -y apt-transport-https ca-certificates curl jq
-
-    echo "Instalando Docker..."
-    sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/docker.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list
-    
-    sudo apt update
-    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-    echo "Configurando containerd..."
-    sudo containerd config default | sudo tee /etc/containerd/config.toml > /dev/null
-    sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
-    sudo systemctl restart containerd
-
-
-    echo "Instalando Kubernetes..."
-    sudo curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-    sudo echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
-    sudo apt update
-    sudo apt install -y kubelet kubeadm kubectl
-
-    echo "Puxando imagens do Kubernetes..."
-    sudo kubeadm config images pull
-
-    echo "Configuração de rede concluída."
+ajustar_hora() {
+  echo "⏱️ Corrigindo data/hora do sistema..."
+  sudo timedatectl set-ntp true
+  sudo timedatectl set-time "$(date -u +'%Y-%m-%d %H:%M:%S')"
 }
 
-# Função para criar e aplicar a configuração do Kubernetes
+configurar_rede() {
+  echo "📡 Configurando rede e kernel..."
+
+  # Cria sysctl.conf se não existir
+  [ -f /etc/sysctl.conf ] || sudo touch /etc/sysctl.conf
+
+  sudo grep -q '^net.ipv4.ip_forward=1' /etc/sysctl.conf || echo 'net.ipv4.ip_forward=1' | sudo tee -a /etc/sysctl.conf
+  sudo grep -q '^net.ipv6.conf.all.forwarding=1' /etc/sysctl.conf || echo 'net.ipv6.conf.all.forwarding=1' | sudo tee -a /etc/sysctl.conf
+  sudo sysctl -p
+
+  echo "💾 Desativando swap..."
+  sudo sed -i '/swap/d' /etc/fstab
+  sudo swapoff -a
+
+  echo "⬆️ Atualizando pacotes..."
+  sudo apt update
+  sudo apt install -y apt-transport-https ca-certificates curl jq gnupg lsb-release
+}
+
+instalar_containerd() {
+  echo "📦 Instalando containerd..."
+  sudo apt install -y containerd
+  sudo mkdir -p /etc/containerd
+  sudo containerd config default | sudo tee /etc/containerd/config.toml
+  sudo sed -i 's/SystemdCgroup = false/SystemdCgroup = true/' /etc/containerd/config.toml
+  sudo systemctl restart containerd
+}
+
+instalar_kubernetes() {
+  echo "☸️ Instalando ferramentas do Kubernetes..."
+  sudo mkdir -p /etc/apt/keyrings
+  curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+  sudo apt update
+  sudo apt install -y kubelet kubeadm kubectl
+  sudo kubeadm config images pull
+}
+
 configurar_kubernetes() {
-    echo "Criando arquivo kubeadm-config.yaml..."
-    cat <<EOF >kubeadm-config.yaml
----
+  echo "📝 Criando kubeadm-config.yaml..."
+  cat <<EOF > kubeadm-config.yaml
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 networking:
@@ -80,75 +70,59 @@ localAPIEndpoint:
   bindPort: 6443
 nodeRegistration:
   kubeletExtraArgs:
-    node-ip: $IPV4,$IPV6
+    node-ip: "$IPV4,$IPV6"
 EOF
 
-    echo "Inicializando Kubernetes com kubeadm..."
-    sudo kubeadm init --config=kubeadm-config.yaml
+  echo "🚀 Inicializando cluster..."
+  if ! sudo kubeadm init --config=kubeadm-config.yaml; then
+    echo "❌ Erro ao inicializar o Kubernetes. Abortando."
+    exit 1
+  fi
 
-    echo "Configurando kubectl..."
-    mkdir -p $HOME_DIR/.kube
-    sudo cp -i /etc/kubernetes/admin.conf $HOME_DIR/.kube/config
-    sudo chown $(id -u):$(id -g) $HOME_DIR/.kube/config
-    sudo export KUBECONFIG="$HOME_DIR/.kube/config"
-
-
-    echo "Baixando e configurando o Flannel..."
-    sudo curl -OL https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml
-
-    echo "Aplicando configuração do Flannel..."
-    kubectl apply -f kube-flannel.yml
-
-    echo "Removendo taint do nó mestre..."
-    kubectl taint nodes --all node-role.kubernetes.io/control-plane:NoSchedule-
-
-    echo "Configuração do Kubernetes concluída."
+  echo "🔧 Configurando kubectl para o usuário atual..."
+  mkdir -p "$HOME_DIR/.kube"
+  sudo cp /etc/kubernetes/admin.conf "$HOME_DIR/.kube/config"
+  sudo chown "$USERNAME:$USERNAME" "$HOME_DIR/.kube/config"
+  chmod 600 "$HOME_DIR/.kube/config"
+  export KUBECONFIG="$HOME_DIR/.kube/config"
 }
 
-# Função para criar pastas e ajustar permissões
 criar_pastas() {
-    echo "Criando pastas para automação..."
-    mkdir -p $HOME_DIR/Documentos/Yaml
-    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Zabbix/zabbix-conf
-    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Postgres/postgres-data
-    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Homeassistant/{Config,localtime,dbus}
-    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Grafana
-    mkdir -p $HOME_DIR/Documentos/Server/Volumes/Jellyfin/{Config,FilmesSeries}
-
-    echo "Criação de pastas concluída."
+  echo "📁 Criando diretórios de volumes..."
+  mkdir -p $HOME_DIR/Documentos/Yaml
+  mkdir -p $HOME_DIR/Documentos/Server/Volumes/Zabbix/zabbix-conf
+  mkdir -p $HOME_DIR/Documentos/Server/Volumes/Postgres/postgres-data
+  mkdir -p $HOME_DIR/Documentos/Server/Volumes/Homeassistant/{Config,localtime,dbus}
+  mkdir -p $HOME_DIR/Documentos/Server/Volumes/Grafana
+  mkdir -p $HOME_DIR/Documentos/Server/Volumes/Jellyfin/{Config,FilmesSeries}
+  sudo chmod -R 777 "$HOME_DIR/Documentos"
 }
 
-# Executando funções
+aplicar_yamls() {
+  echo "⬇️ Baixando YAMLs..."
+  cd "$HOME_DIR/Documentos/Yaml"
+  for file in zabbix-db.yaml zabbix-frontend.yaml zabbix-server.yaml grafana.yaml jellyfin.yaml homeassistant.yaml; do
+    wget -q "https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/$file"
+  done
+  wget -q "https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml"
+
+  echo "✅ Aplicando flannel..."
+  kubectl apply -f kube-flannel.yml || true
+  kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
+
+  echo "📦 Aplicando serviços..."
+  for yaml in *.yaml; do
+    kubectl apply -f "$yaml" --validate=false
+  done
+}
+
+### 🧭 Execução
+ajustar_hora
 configurar_rede
+instalar_containerd
+instalar_kubernetes
 configurar_kubernetes
-
-echo "Script de configuração concluído."
-
-echo "Criando pastas para automação..."
 criar_pastas
+aplicar_yamls
 
-echo "Script finalizado por completo"
-
-echo "Entrando na pasta dos Yamls"
-cd $HOME_DIR/Documentos/Yaml
-
-echo "Dando permissoes para as pastas"
-sudo chmod 777 -R /home/anakin/Documentos
-
-echo "Download dos Yamls"
-wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zabbix-db.yaml
-wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zabbix-frontend.yaml
-wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/zabbix-server.yaml
-wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/grafana.yaml
-wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/jellyfin.yaml
-wget https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/homeassistant.yaml
-
-echo "Executando os zabbix"
-kubectl apply -f zabbix-db.yaml
-kubectl apply -f zabbix-server.yaml
-kubectl apply -f zabbix-frontend.yaml
-kubectl apply -f grafana.yaml
-kubectl apply -f jellyfin.yaml
-kubectl apply -f homeassistant.yaml
-
-echo "...................Finalizado................"
+echo "✅ Kubernetes instalado e serviços aplicados com sucesso!"

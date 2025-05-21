@@ -19,7 +19,10 @@ ajustar_hora() {
   sudo systemctl start systemd-timesyncd || true
 
   echo "⏱️ Verificando status do NTP..."
-  sudo timedatectl set-ntp true
+  sudo timedatectl set-ntp true >/dev/null 2>&1 || sudo dbus-send --system \
+    --print-reply --dest=org.freedesktop.timedate1 \
+    /org/freedesktop/timedate1 org.freedesktop.timedate1.SetNTP boolean:true
+
   if timedatectl show -p NTPSynchronized --value | grep -q "yes"; then
     echo "✅ NTP sincronizado com sucesso."
   else

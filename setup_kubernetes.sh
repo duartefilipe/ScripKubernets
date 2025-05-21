@@ -11,20 +11,10 @@ IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1)
 cd "$HOME_DIR"
 
 ajustar_hora() {
-  echo "⏱️ Corrigindo data/hora do sistema..."
-
-  # Desativa NTP temporariamente para permitir ajuste de hora
-  sudo timedatectl set-ntp false
-
-  # Define a hora UTC atual
-  sudo timedatectl set-time "$(date -u +'%Y-%m-%d %H:%M:%S')"
-
-  # Reativa NTP após o ajuste
+  echo "⏱️ Verificando sincronização de data/hora..."
   sudo timedatectl set-ntp true
-
-  echo "🕒 Hora ajustada com sucesso."
+  timedatectl status | grep "NTP synchronized"
 }
-
 
 configurar_rede() {
   echo "📡 Configurando rede e kernel..."

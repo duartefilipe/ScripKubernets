@@ -61,6 +61,6 @@ spec:
     app: homeassistant
   ports:
     - protocol: TCP
-      port: 8123  # Porta usada pelo Home Assistant
-      targetPort: 8123  # Porta que o Home Assistant expõe
-      nodePort: 30006  # Porta no nó Kubernetes que será exposta externamente
+      port: 8123  
+      targetPort: 8123 
+      nodePort: 30006  

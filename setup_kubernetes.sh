@@ -12,6 +12,7 @@ cd "$HOME_DIR"
 
 ajustar_hora() {
   echo "🕒 Instalando ntpdate ignorando validade de release..."
+  esperar_apt
   sudo apt-get install -o Acquire::Check-Valid-Until=false -y ntpdate || {
     echo "❌ Falha crítica ao instalar ntpdate. Abortando."
     exit 1
@@ -34,8 +35,10 @@ ajustar_hora() {
   fi
 
   echo "⬆️ Atualizando pacotes com hora já corrigida..."
+  esperar_apt
   sudo apt update
 }
+
 
 configurar_rede() {
   echo "📡 Configurando rede e kernel..."

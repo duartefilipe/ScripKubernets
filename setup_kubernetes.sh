@@ -12,6 +12,7 @@ cd "$HOME_DIR"
 
 ajustar_hora() {
   echo "🕒 Instalando ntpdate para sincronização de horário..."
+  sudo apt update
   sudo apt install -y ntpdate
 
   echo "🕒 Forçando sincronização do horário com pool.ntp.org..."
@@ -29,7 +30,6 @@ ajustar_hora() {
   else
     echo "⚠️ NTP ainda não sincronizado. Continuando mesmo assim..."
   fi
-  sudo apt update
 }
 
 configurar_rede() {

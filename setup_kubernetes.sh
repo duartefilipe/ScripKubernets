@@ -6,7 +6,7 @@ echo "===== Iniciando configuração Kubernetes ====="
 USERNAME=$(whoami)
 HOME_DIR="/home/$USERNAME"
 IPV4=$(hostname -I | awk '{print $1}')
-IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1)
+IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1 || echo "")
 
 cd "$HOME_DIR"
 
@@ -27,11 +27,8 @@ ajustar_hora() {
     --print-reply --dest=org.freedesktop.timedate1 \
     /org/freedesktop/timedate1 org.freedesktop.timedate1.SetNTP boolean:true
 
-  if timedatectl show -p NTPSynchronized --value | grep -q "yes"; then
-    echo "✅ NTP sincronizado com sucesso."
-  else
-    echo "⚠️ NTP ainda não sincronizado. Continuando mesmo assim..."
-  fi
+  timedatectl show -p NTPSynchronized --value | grep -q "yes" &&
+    echo "✅ NTP sincronizado com sucesso." || echo "⚠️ NTP ainda não sincronizado. Continuando..."
 
   echo "⬆️ Atualizando pacotes com hora já corrigida..."
   sudo apt update || true
@@ -39,8 +36,6 @@ ajustar_hora() {
 
 configurar_rede() {
   echo "📡 Configurando rede e kernel..."
-  [ -f /etc/sysctl.conf ] || sudo touch /etc/sysctl.conf
-
   sudo grep -q '^net.ipv4.ip_forward=1' /etc/sysctl.conf || echo 'net.ipv4.ip_forward=1' | sudo tee -a /etc/sysctl.conf
   sudo grep -q '^net.ipv6.conf.all.forwarding=1' /etc/sysctl.conf || echo 'net.ipv6.conf.all.forwarding=1' | sudo tee -a /etc/sysctl.conf
   sudo sysctl -p
@@ -49,7 +44,6 @@ configurar_rede() {
   sudo sed -i '/swap/d' /etc/fstab
   sudo swapoff -a
 
-  sudo apt update
   sudo apt install -y apt-transport-https ca-certificates curl jq gnupg lsb-release
 }
 
@@ -80,7 +74,7 @@ limpar_instalacao_anterior() {
   sudo ip link delete cni0 || true
   sudo ip link delete flannel.1 || true
   sudo systemctl restart containerd
-  kubectl delete ns kube-flannel --ignore-not-found
+  kubectl delete ns kube-flannel --ignore-not-found || true
   echo "✅ Limpeza concluída."
 }
 
@@ -100,7 +94,7 @@ localAPIEndpoint:
   bindPort: 6443
 nodeRegistration:
   kubeletExtraArgs:
-    node-ip: "$IPV4,$IPV6"
+    node-ip: "$IPV4${IPV6:+,$IPV6}"
 EOF
 
   echo "🚀 Inicializando cluster..."
@@ -117,15 +111,12 @@ EOF
 aguardar_cluster() {
   echo "⏳ Aguardando o Kubernetes ficar pronto..."
   for i in {1..30}; do
-    if kubectl get nodes | grep -q "NotReady"; then
-      echo "⏳ Aguardando node se tornar Ready... ($i/30)"
-      sleep 5
-    else
-      echo "✅ Cluster pronto!"
-      return 0
-    fi
+    READY=$(kubectl get nodes 2>/dev/null | grep -v "NotReady" | grep -q "$HOSTNAME" && echo "ok" || echo "")
+    [ "$READY" = "ok" ] && echo "✅ Cluster pronto!" && return 0
+    echo "⏳ Esperando node se tornar Ready... ($i/30)"
+    sleep 5
   done
-  echo "⚠️ Node ainda está NotReady. Verifique o status manualmente com kubectl describe node"
+  echo "⚠️ Node ainda está NotReady. Verifique o status com: kubectl describe node"
 }
 
 criar_pastas() {
@@ -147,8 +138,9 @@ aplicar_yamls() {
   done
 
   echo "✅ Aplicando Flannel (v0.22.0)..."
-  kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.22.0/Documentation/kube-flannel.yml
+  kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.22.0/Documentation/kube-flannel.yml --validate=false
 
+  echo "🚫 Removendo taints do control-plane..."
   kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
 
   echo "📦 Aplicando serviços..."
@@ -164,8 +156,8 @@ instalar_containerd
 instalar_kubernetes
 limpar_instalacao_anterior
 configurar_kubernetes
-aplicar_yamls
 aguardar_cluster
+aplicar_yamls
 criar_pastas
 
 echo "✅ Kubernetes instalado com sucesso e serviços aplicados."

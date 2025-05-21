@@ -3,6 +3,13 @@ set -e
 
 echo "===== Iniciando configuração Kubernetes ====="
 
+echo "🕒 Forçando sincronização do horário com ntpdate..."
+sudo apt update
+sudo apt install -y ntpdate
+sudo systemctl stop systemd-timesyncd || true
+sudo ntpdate -u pool.ntp.org || echo "⚠️ Falha ao sincronizar com pool.ntp.org. Verifique a conexão."
+sudo systemctl start systemd-timesyncd || true
+
 USERNAME=$(whoami)
 HOME_DIR="/home/$USERNAME"
 IPV4=$(hostname -I | awk '{print $1}')
@@ -11,17 +18,13 @@ IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1)
 cd "$HOME_DIR"
 
 ajustar_hora() {
-  echo "⏱️ Sincronizando data/hora com servidores NTP..."
-  sudo apt update
-  sudo apt install -y ntpdate
-  sudo ntpdate pool.ntp.org || echo "⚠️ Falha ao sincronizar com pool.ntp.org. Verifique a conexão."
-  sudo timedatectl set-ntp true
+  echo "⏱️ Verificando status do NTP..."
+  timedatectl set-ntp true
   timedatectl status | grep "NTP synchronized"
 }
 
 configurar_rede() {
   echo "📡 Configurando rede e kernel..."
-
   [ -f /etc/sysctl.conf ] || sudo touch /etc/sysctl.conf
 
   sudo grep -q '^net.ipv4.ip_forward=1' /etc/sysctl.conf || echo 'net.ipv4.ip_forward=1' | sudo tee -a /etc/sysctl.conf

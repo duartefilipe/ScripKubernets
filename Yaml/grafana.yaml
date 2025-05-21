@@ -37,7 +37,7 @@ spec:
     spec:
       initContainers:
       - name: init-permissions
-        image: busybox
+        image: busybox:1.36.1
         command: ["sh", "-c"]
         args: ["chmod -R 777 /var/lib/grafana"]
         volumeMounts:
@@ -45,14 +45,7 @@ spec:
           mountPath: "/var/lib/grafana"
       containers:
       - name: grafana
-        image: grafana/grafana:latest
-#        resources:
-#          requests:
-#            memory: "128Mi"
-#            cpu: "100m"
-#          limits:
-#            memory: "256Mi"
-#            cpu: "200m"
+        image: grafana/grafana:stable
         ports:
         - containerPort: 3000
         volumeMounts:

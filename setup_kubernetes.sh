@@ -110,6 +110,22 @@ EOF
   export KUBECONFIG="$HOME_DIR/.kube/config"
 }
 
+aguardar_cluster() {
+  echo "⏳ Aguardando o Kubernetes ficar pronto..."
+  for i in {1..30}; do
+    if kubectl get nodes &>/dev/null; then
+      echo "✅ Cluster pronto!"
+      return 0
+    fi
+    echo "⏳ Tentativa $i: aguardando kube-apiserver..."
+    sleep 5
+  done
+
+  echo "❌ Timeout: Kubernetes não ficou pronto a tempo."
+  exit 1
+}
+
+
 criar_pastas() {
   echo "📁 Criando diretórios de volumes..."
   mkdir -p $HOME_DIR/Documentos/Yaml
@@ -146,6 +162,7 @@ instalar_containerd
 instalar_kubernetes
 limpar_instalacao_anterior
 configurar_kubernetes
+aguardar_cluster
 criar_pastas
 aplicar_yamls
 

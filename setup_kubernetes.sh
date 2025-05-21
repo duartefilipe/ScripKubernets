@@ -3,13 +3,6 @@ set -e
 
 echo "===== Iniciando configuração Kubernetes ====="
 
-echo "🕒 Forçando sincronização do horário com ntpdate..."
-sudo apt update
-sudo apt install -y ntpdate
-sudo systemctl stop systemd-timesyncd || true
-sudo ntpdate -u pool.ntp.org || echo "⚠️ Falha ao sincronizar com pool.ntp.org. Verifique a conexão."
-sudo systemctl start systemd-timesyncd || true
-
 USERNAME=$(whoami)
 HOME_DIR="/home/$USERNAME"
 IPV4=$(hostname -I | awk '{print $1}')
@@ -18,9 +11,20 @@ IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1)
 cd "$HOME_DIR"
 
 ajustar_hora() {
+  echo "🕒 Forçando sincronização do horário com ntpdate..."
+  sudo apt update
+  sudo apt install -y ntpdate
+  sudo systemctl stop systemd-timesyncd || true
+  sudo ntpdate -u pool.ntp.org || echo "⚠️ Falha ao sincronizar com pool.ntp.org"
+  sudo systemctl start systemd-timesyncd || true
+
   echo "⏱️ Verificando status do NTP..."
-  timedatectl set-ntp true
-  timedatectl status | grep "NTP synchronized"
+  sudo timedatectl set-ntp true
+  if timedatectl show -p NTPSynchronized --value | grep -q "yes"; then
+    echo "✅ NTP sincronizado com sucesso."
+  else
+    echo "⚠️ NTP ainda não sincronizado. Continuando mesmo assim..."
+  fi
 }
 
 configurar_rede() {

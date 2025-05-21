@@ -115,6 +115,7 @@ EOF
   sudo chown "$USERNAME:$USERNAME" "$HOME_DIR/.kube/config"
   chmod 600 "$HOME_DIR/.kube/config"
   export KUBECONFIG="$HOME_DIR/.kube/config"
+  grep -qxF "export KUBECONFIG=\$HOME/.kube/config" "$HOME_DIR/.bashrc" || echo "export KUBECONFIG=\$HOME/.kube/config" >> "$HOME_DIR/.bashrc"
 }
 
 aguardar_cluster() {
@@ -131,7 +132,6 @@ aguardar_cluster() {
   echo "❌ Timeout: Kubernetes não ficou pronto a tempo."
   exit 1
 }
-
 
 criar_pastas() {
   echo "📁 Criando diretórios de volumes..."

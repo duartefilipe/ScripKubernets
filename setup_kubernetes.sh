@@ -95,8 +95,8 @@ configurar_kubernetes() {
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 networking:
-  podSubnet: 10.244.0.0/16,fc00:10:244::/56
-  serviceSubnet: 10.96.0.0/16,fc00:10:96::/108
+  podSubnet: 10.244.0.0/16
+  serviceSubnet: 10.96.0.0/16
 ---
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
@@ -105,7 +105,7 @@ localAPIEndpoint:
   bindPort: 6443
 nodeRegistration:
   kubeletExtraArgs:
-    node-ip: "$IPV4${IPV6:+,$IPV6}"
+    node-ip: "$IPV4"
 EOF
 
   echo "🚀 Inicializando cluster..."

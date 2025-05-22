@@ -9,6 +9,7 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: /mnt/data/grafana
+  persistentVolumeReclaimPolicy: Retain
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

@@ -10,22 +10,16 @@ IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1 
 
 cd "$HOME_DIR"
 
-detectar_versao_ubuntu() {
-  UBUNTU_VERSION=$(lsb_release -rs)
-  echo "🧭 Detectando versão do Ubuntu... Encontrada: $UBUNTU_VERSION"
-
-  case "$UBUNTU_VERSION" in
-    24.04)
-      echo "📌 Ubuntu 24.04 detectado."
-      ;;
-    25.04)
-      echo "📌 Ubuntu 25.04 detectado. Aplicando ajustes se necessário."
-      ;;
-    *)
-      echo "⚠️ Versão $UBUNTU_VERSION não oficialmente suportada. Continuando com cautela..."
-      ;;
-  esac
-}
+# Detecta a versão do Ubuntu
+UBUNTU_VERSION=$(lsb_release -rs | cut -d. -f1)
+echo "🧭 Detectando versão do Ubuntu... Encontrada: $(lsb_release -rs)"
+if [[ "$UBUNTU_VERSION" -eq 24 ]]; then
+  echo "📌 Ubuntu 24.04 detectado."
+elif [[ "$UBUNTU_VERSION" -eq 25 ]]; then
+  echo "📌 Ubuntu 25.04 detectado."
+else
+  echo "⚠️ Versão do Ubuntu não testada. Continuando mesmo assim..."
+fi
 
 ajustar_hora() {
   echo "🕒 Instalando ntpdate ignorando validade de release..."
@@ -124,19 +118,6 @@ EOF
   chmod 600 "$HOME_DIR/.kube/config"
 }
 
-aguardar_cluster() {
-  echo "⏳ Aguardando o Kubernetes ficar pronto..."
-  for i in {1..30}; do
-    if kubectl get nodes --no-headers 2>/dev/null | grep "$HOSTNAME" | grep -q " Ready"; then
-      echo "✅ Cluster pronto!"
-      return 0
-    fi
-    echo "⏳ Esperando node se tornar Ready... ($i/30)"
-    sleep 5
-  done
-  echo "⚠️ Node ainda está NotReady. Verifique o status com: kubectl describe node"
-}
-
 criar_pastas() {
   echo "📁 Criando diretórios de volumes..."
   mkdir -p $HOME_DIR/Documentos/Yaml
@@ -155,9 +136,6 @@ aplicar_yamls() {
     wget -q "https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/$file"
   done
 
-  echo "✅ Aplicando Flannel (v0.25.3)..."
-  kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.25.3/Documentation/kube-flannel.yml --validate=false
-
   echo "🚫 Removendo taints do control-plane..."
   kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
 
@@ -167,17 +145,31 @@ aplicar_yamls() {
   done
 }
 
+aguardar_cluster() {
+  echo "⏳ Aguardando o Kubernetes ficar pronto..."
+  for i in {1..30}; do
+    if kubectl get nodes --no-headers 2>/dev/null | grep "$HOSTNAME" | grep -q " Ready"; then
+      echo "✅ Cluster pronto!"
+      return 0
+    fi
+    echo "⏳ Esperando node se tornar Ready... ($i/30)"
+    sleep 5
+  done
+  echo "⚠️ Node ainda está NotReady. Verifique o status com: kubectl describe node"
+  kubectl get pods -A || true
+}
+
 # === Execução principal ===
-detectar_versao_ubuntu
 ajustar_hora
 configurar_rede
 instalar_containerd
 instalar_kubernetes
 limpar_instalacao_anterior
 configurar_kubernetes
+criar_pastas
+kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.25.3/Documentation/kube-flannel.yml --validate=false
 aguardar_cluster
 aplicar_yamls
-criar_pastas
 
 echo "✅ Kubernetes instalado com sucesso e serviços aplicados."
 #echo "♻️ Reinicializando o servidor em 10 segundos..."

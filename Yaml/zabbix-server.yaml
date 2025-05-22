@@ -5,7 +5,7 @@ metadata:
 spec:
   ports:
     - port: 10051
-      targetPort: 10051
+      targetPort: 30001
   selector:
     app: zabbix-server
 ---

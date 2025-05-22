@@ -162,6 +162,6 @@ aplicar_yamls
 criar_pastas
 
 echo "✅ Kubernetes instalado com sucesso e serviços aplicados."
-echo "♻️ Reinicializando o servidor em 10 segundos..."
-sleep 10
-sudo reboot
+#echo "♻️ Reinicializando o servidor em 10 segundos..."
+#sleep 10
+#sudo reboot

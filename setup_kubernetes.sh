@@ -105,14 +105,15 @@ EOF
   sudo cp /etc/kubernetes/admin.conf "$HOME_DIR/.kube/config"
   sudo chown "$USERNAME:$USERNAME" "$HOME_DIR/.kube/config"
   chmod 600 "$HOME_DIR/.kube/config"
-  export KUBECONFIG="$HOME_DIR/.kube/config"
 }
 
 aguardar_cluster() {
   echo "⏳ Aguardando o Kubernetes ficar pronto..."
   for i in {1..30}; do
-    READY=$(kubectl get nodes 2>/dev/null | grep -v "NotReady" | grep -q "$HOSTNAME" && echo "ok" || echo "")
-    [ "$READY" = "ok" ] && echo "✅ Cluster pronto!" && return 0
+    if kubectl get nodes --no-headers 2>/dev/null | grep "$HOSTNAME" | grep -q " Ready"; then
+      echo "✅ Cluster pronto!"
+      return 0
+    fi
     echo "⏳ Esperando node se tornar Ready... ($i/30)"
     sleep 5
   done
@@ -137,8 +138,8 @@ aplicar_yamls() {
     wget -q "https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/Yaml/$file"
   done
 
-  echo "✅ Aplicando Flannel (v0.22.0)..."
-  kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.22.0/Documentation/kube-flannel.yml --validate=false
+  echo "✅ Aplicando Flannel (v0.25.3)..."
+  kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.25.3/Documentation/kube-flannel.yml --validate=false
 
   echo "🚫 Removendo taints do control-plane..."
   kubectl taint nodes --all node-role.kubernetes.io/control-plane- || true
@@ -149,7 +150,7 @@ aplicar_yamls() {
   done
 }
 
-### Execução principal
+# === Execução principal ===
 ajustar_hora
 configurar_rede
 instalar_containerd

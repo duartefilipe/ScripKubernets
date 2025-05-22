@@ -10,6 +10,23 @@ IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1 
 
 cd "$HOME_DIR"
 
+detectar_versao_ubuntu() {
+  UBUNTU_VERSION=$(lsb_release -rs)
+  echo "🧭 Detectando versão do Ubuntu... Encontrada: $UBUNTU_VERSION"
+
+  case "$UBUNTU_VERSION" in
+    24.04)
+      echo "📌 Ubuntu 24.04 detectado."
+      ;;
+    25.04)
+      echo "📌 Ubuntu 25.04 detectado. Aplicando ajustes se necessário."
+      ;;
+    *)
+      echo "⚠️ Versão $UBUNTU_VERSION não oficialmente suportada. Continuando com cautela..."
+      ;;
+  esac
+}
+
 ajustar_hora() {
   echo "🕒 Instalando ntpdate ignorando validade de release..."
   sudo apt-get install -o Acquire::Check-Valid-Until=false -y ntpdate || {
@@ -151,6 +168,7 @@ aplicar_yamls() {
 }
 
 # === Execução principal ===
+detectar_versao_ubuntu
 ajustar_hora
 configurar_rede
 instalar_containerd

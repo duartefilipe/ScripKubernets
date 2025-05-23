@@ -193,3 +193,8 @@ aplicar_yamls
 
 echo "✅ Kubernetes instalado com sucesso e serviços aplicados."
 echo "📜 Logs salvos em: $LOG_FILE"
+
+read -p "Deseja acompanhar os pods em tempo real? (s/n): " RESPOSTA
+if [[ "$RESPOSTA" =~ ^[sS]$ ]]; then
+  watch kubectl get pods -A
+fi

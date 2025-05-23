@@ -89,8 +89,8 @@ limpar_instalacao_anterior() {
 }
 
 instalar_plugins_cni() {
-  echo "🔌 Instalando plugins CNI padrão..."
-  CNI_VERSION="v1.3.0"
+  echo "🔌 Instalando plugins CNI (incluindo loopback)..."
+  CNI_VERSION="v1.4.1"
   ARCH="amd64"
   CNI_TGZ="cni-plugins-linux-$ARCH-$CNI_VERSION.tgz"
   URL="https://github.com/containernetworking/plugins/releases/download/$CNI_VERSION/$CNI_TGZ"
@@ -100,9 +100,9 @@ instalar_plugins_cni() {
   sudo tar -C /opt/cni/bin -xzvf "$CNI_TGZ"
   rm "$CNI_TGZ"
 
-  echo "✅ Plugins CNI instalados em /opt/cni/bin"
+  echo "✅ Plugins CNI v$CNI_VERSION instalados com sucesso."
+  ls -l /opt/cni/bin | grep loopback || echo "❌ loopback não encontrado. Algo deu errado!"
 }
-
 
 configurar_kubernetes() {
   echo "📝 Criando kubeadm-config.yaml..."

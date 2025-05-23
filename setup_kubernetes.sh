@@ -103,7 +103,21 @@ instalar_plugins_cni() {
   sudo chmod +x /opt/cni/bin/*
   sudo chown root:root /opt/cni/bin/*
   echo "✅ Plugins CNI instalados em /opt/cni/bin"
+
+  echo "🔎 Verificando se plugin loopback está presente..."
+  if [[ -x /opt/cni/bin/loopback ]]; then
+    echo "✅ Plugin loopback encontrado."
+
+    echo "🧹 Deletando pods travados do CoreDNS para forçar recriação..."
+    kubectl delete pod -n kube-system -l k8s-app=kube-dns --ignore-not-found --force --grace-period=0
+    echo "♻️ CoreDNS será recriado automaticamente pelo ReplicaSet."
+
+  else
+    echo "❌ Plugin loopback não encontrado após instalação!"
+    exit 1
+  fi
 }
+
 
 configurar_kubernetes() {
   echo "📝 Criando kubeadm-config.yaml..."

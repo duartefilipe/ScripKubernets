@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+LOG_FILE="$HOME/k8s-install.log"
+exec > >(tee -a "$LOG_FILE") 2>&1
+
 echo "===== Iniciando configuração Kubernetes ====="
 
 USERNAME=$(whoami)
@@ -89,19 +92,10 @@ limpar_instalacao_anterior() {
 }
 
 instalar_plugins_cni() {
-  echo "🔌 Instalando plugins CNI (incluindo loopback)..."
-  CNI_VERSION="v1.4.1"
-  ARCH="amd64"
-  CNI_TGZ="cni-plugins-linux-$ARCH-$CNI_VERSION.tgz"
-  URL="https://github.com/containernetworking/plugins/releases/download/$CNI_VERSION/$CNI_TGZ"
-
+  echo "🔌 Instalando plugins CNI (com loopback)..."
   sudo mkdir -p /opt/cni/bin
-  curl -L "$URL" -o "$CNI_TGZ"
-  sudo tar -C /opt/cni/bin -xzvf "$CNI_TGZ"
-  rm "$CNI_TGZ"
-
-  echo "✅ Plugins CNI v$CNI_VERSION instalados com sucesso."
-  ls -l /opt/cni/bin | grep loopback || echo "❌ loopback não encontrado. Algo deu errado!"
+  curl -L https://github.com/containernetworking/plugins/releases/download/v1.4.1/cni-plugins-linux-amd64-v1.4.1.tgz | sudo tar -C /opt/cni/bin -xz
+  echo "✅ Plugins CNI instalados em /opt/cni/bin"
 }
 
 configurar_kubernetes() {
@@ -191,7 +185,4 @@ aguardar_cluster
 aplicar_yamls
 
 echo "✅ Kubernetes instalado com sucesso e serviços aplicados."
-
-#echo "♻️ Reinicializando o servidor em 10 segundos..."
-#sleep 10
-#sudo reboot
+echo "📜 Logs salvos em: $LOG_FILE"

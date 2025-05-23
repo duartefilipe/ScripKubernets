@@ -209,6 +209,11 @@ echo "✅ Kubernetes instalado com sucesso e serviços aplicados."
 echo "📜 Logs salvos em: $LOG_FILE"
 
 read -p "Deseja acompanhar os pods em tempo real? (s/n): " RESPOSTA
-if [[ "$RESPOSTA" =~ ^[sS]$ ]]; then
-  watch kubectl get pods -A
+if [ -t 0 ]; then
+  read -p "Deseja acompanhar os pods em tempo real? (s/n): " RESPOSTA
+  if [[ "$RESPOSTA" =~ ^[sS]$ ]]; then
+    watch kubectl get pods -A
+  fi
+else
+  echo "🔁 Execução não interativa: pulando visualização em tempo real dos pods."
 fi

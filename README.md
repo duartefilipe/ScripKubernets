@@ -28,7 +28,7 @@ Após a execução do script, os seguintes serviços são configurados e executa
 
 - Corrige automaticamente a data/hora com `ntpdate`
 - Desativa o `swap`
-- Ativa o encaminhamento de pacotes IPv4 e IPv6
+- Ativa o encaminhamento de pacotes IPv4
 - Instala e configura:
   - `containerd`
   - `kubelet`, `kubeadm`, `kubectl`

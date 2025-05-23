@@ -57,12 +57,6 @@ configurar_rede() {
   sudo apt install -y apt-transport-https ca-certificates curl jq gnupg lsb-release
 }
 
-instalar_cni_plugins() {
-  echo "🔌 Instalando CNI plugins (incluindo loopback)..."
-  sudo mkdir -p /opt/cni/bin
-  curl -L https://github.com/containernetworking/plugins/releases/download/v1.4.1/cni-plugins-linux-amd64-v1.4.1.tgz | sudo tar -C /opt/cni/bin -xz
-}
-
 instalar_containerd() {
   echo "📦 Instalando containerd..."
   sudo apt install -y containerd
@@ -93,6 +87,22 @@ limpar_instalacao_anterior() {
   kubectl delete ns kube-flannel --ignore-not-found || true
   echo "✅ Limpeza concluída."
 }
+
+instalar_plugins_cni() {
+  echo "🔌 Instalando plugins CNI padrão..."
+  CNI_VERSION="v1.3.0"
+  ARCH="amd64"
+  CNI_TGZ="cni-plugins-linux-$ARCH-$CNI_VERSION.tgz"
+  URL="https://github.com/containernetworking/plugins/releases/download/$CNI_VERSION/$CNI_TGZ"
+
+  sudo mkdir -p /opt/cni/bin
+  curl -L "$URL" -o "$CNI_TGZ"
+  sudo tar -C /opt/cni/bin -xzvf "$CNI_TGZ"
+  rm "$CNI_TGZ"
+
+  echo "✅ Plugins CNI instalados em /opt/cni/bin"
+}
+
 
 configurar_kubernetes() {
   echo "📝 Criando kubeadm-config.yaml..."
@@ -172,6 +182,7 @@ ajustar_hora
 configurar_rede
 instalar_containerd
 instalar_cni_plugins
+instalar_plugins_cni
 instalar_kubernetes
 limpar_instalacao_anterior
 configurar_kubernetes

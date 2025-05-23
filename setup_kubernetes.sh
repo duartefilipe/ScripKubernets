@@ -94,8 +94,17 @@ limpar_instalacao_anterior() {
 instalar_plugins_cni() {
   echo "🔌 Instalando plugins CNI (com loopback)..."
   sudo mkdir -p /opt/cni/bin
-  curl -L https://github.com/containernetworking/plugins/releases/download/v1.4.1/cni-plugins-linux-amd64-v1.4.1.tgz | sudo tar -C /opt/cni/bin -xz
+
+  curl -L https://github.com/containernetworking/plugins/releases/download/v1.4.1/cni-plugins-linux-amd64-v1.4.1.tgz \
+    | sudo tar -C /opt/cni/bin -xz
+
+  sudo chmod +x /opt/cni/bin/*
+  sudo chown root:root /opt/cni/bin/*
+
   echo "✅ Plugins CNI instalados em /opt/cni/bin"
+
+  echo "♻️ Reiniciando kubelet para garantir que encontre os plugins CNI..."
+  sudo systemctl restart kubelet
 }
 
 configurar_kubernetes() {

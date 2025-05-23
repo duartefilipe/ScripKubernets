@@ -167,7 +167,7 @@ instalar_kubernetes
 limpar_instalacao_anterior
 configurar_kubernetes
 criar_pastas
-kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/v0.25.3/Documentation/kube-flannel.yml --validate=false
+kubectl apply -f https://raw.githubusercontent.com/duartefilipe/ScripKubernets/refs/heads/main/kube-flannel.yml --validate=false
 aguardar_cluster
 aplicar_yamls
 

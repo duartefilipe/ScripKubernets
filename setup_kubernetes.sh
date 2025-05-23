@@ -181,7 +181,6 @@ aguardar_cluster() {
 ajustar_hora
 configurar_rede
 instalar_containerd
-instalar_cni_plugins
 instalar_plugins_cni
 instalar_kubernetes
 limpar_instalacao_anterior

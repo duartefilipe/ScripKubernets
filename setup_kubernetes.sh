@@ -6,7 +6,6 @@ echo "===== Iniciando configuração Kubernetes ====="
 USERNAME=$(whoami)
 HOME_DIR="/home/$USERNAME"
 IPV4=$(hostname -I | awk '{print $1}')
-IPV6=$(ip -6 addr show scope global | grep inet6 | awk '{print $2}' | head -n 1 || echo "")
 
 cd "$HOME_DIR"
 
@@ -56,6 +55,12 @@ configurar_rede() {
   sudo swapoff -a
 
   sudo apt install -y apt-transport-https ca-certificates curl jq gnupg lsb-release
+}
+
+instalar_cni_plugins() {
+  echo "🔌 Instalando CNI plugins (incluindo loopback)..."
+  sudo mkdir -p /opt/cni/bin
+  curl -L https://github.com/containernetworking/plugins/releases/download/v1.4.1/cni-plugins-linux-amd64-v1.4.1.tgz | sudo tar -C /opt/cni/bin -xz
 }
 
 instalar_containerd() {
@@ -120,12 +125,15 @@ EOF
 
 criar_pastas() {
   echo "📁 Criando diretórios de volumes..."
-  mkdir -p $HOME_DIR/Documentos/Yaml
-  mkdir -p $HOME_DIR/Documentos/Server/Volumes/Zabbix/zabbix-conf
-  mkdir -p $HOME_DIR/Documentos/Server/Volumes/Postgres/postgres-data
-  mkdir -p $HOME_DIR/Documentos/Server/Volumes/Homeassistant/{Config,localtime,dbus}
-  mkdir -p $HOME_DIR/Documentos/Server/Volumes/Grafana
-  mkdir -p $HOME_DIR/Documentos/Server/Volumes/Jellyfin/{Config,FilmesSeries}
+  mkdir -p "$HOME_DIR/Documentos/Yaml"
+  mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Zabbix/zabbix-conf"
+  mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Postgres/postgres-data"
+  mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Homeassistant/Config"
+  mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Homeassistant/localtime"
+  mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Homeassistant/dbus"
+  mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Grafana"
+  mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Jellyfin/Config"
+  mkdir -p "$HOME_DIR/Documentos/Server/Volumes/Jellyfin/FilmesSeries"
   sudo chmod -R 777 "$HOME_DIR/Documentos"
 }
 
@@ -163,15 +171,17 @@ aguardar_cluster() {
 ajustar_hora
 configurar_rede
 instalar_containerd
+instalar_cni_plugins
 instalar_kubernetes
 limpar_instalacao_anterior
 configurar_kubernetes
 criar_pastas
-kubectl apply -f https://raw.githubusercontent.com/duartefilipe/ScripKubernets/refs/heads/main/kube-flannel.yml --validate=false
+kubectl apply -f https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml --validate=false
 aguardar_cluster
 aplicar_yamls
 
 echo "✅ Kubernetes instalado com sucesso e serviços aplicados."
+
 #echo "♻️ Reinicializando o servidor em 10 segundos..."
 #sleep 10
 #sudo reboot

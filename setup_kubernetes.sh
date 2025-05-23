@@ -182,10 +182,10 @@ aguardar_cluster() {
 ajustar_hora
 configurar_rede
 instalar_containerd
-instalar_plugins_cni
 instalar_kubernetes
 limpar_instalacao_anterior
 configurar_kubernetes
+instalar_plugins_cni
 criar_pastas
 kubectl apply -f https://raw.githubusercontent.com/duartefilipe/ScripKubernets/main/kube-flannel.yml --validate=false
 aguardar_cluster

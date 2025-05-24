@@ -1,20 +1,10 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: zabbix-server
-spec:
-  ports:
-    - port: 10051
-      targetPort: 30001
-  selector:
-    app: zabbix-server
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zabbix-server
+  labels:
+    app: zabbix-server
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: zabbix-server
@@ -28,15 +18,50 @@ spec:
         image: zabbix/zabbix-server-pgsql:latest
         env:
         - name: POSTGRES_USER
-          value: "zabbix"
+          valueFrom:
+            secretKeyRef:
+              name: zabbix-db-secrets
+              key: POSTGRES_USER
         - name: POSTGRES_PASSWORD
-          value: "zabbix"
+          valueFrom:
+            secretKeyRef:
+              name: zabbix-db-secrets
+              key: POSTGRES_PASSWORD
         - name: DB_SERVER_HOST
           value: "zabbix-db-internal"
-#        resources:
-#         requests:
-#            memory: "128Mi"
-#            cpu: "100m"
-#          limits:
-#            memory: "512Mi"
-#            cpu: "500m"
+        ports:
+        - containerPort: 10051
+        livenessProbe:
+          tcpSocket:
+            port: 10051
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 6
+        readinessProbe:
+          tcpSocket:
+            port: 10051
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m" # 1 CPU core
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-server
+  labels:
+    app: zabbix-server
+spec:
+  selector:
+    app: zabbix-server
+  ports:
+  - port: 10051
+    targetPort: 10051

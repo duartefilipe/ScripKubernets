@@ -1,9 +1,19 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: zabbix-db-secrets
+type: Opaque
+stringData:
+  POSTGRES_USER: "zabbix"
+  POSTGRES_PASSWORD: "sua_senha_secreta_e_forte" # MUDE ESTA SENHA PARA UMA FORTE E ÚNICA!
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zabbix-db
+  labels:
+    app: zabbix-db
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: zabbix-db
@@ -12,69 +22,73 @@ spec:
       labels:
         app: zabbix-db
     spec:
-      initContainers:
-      - name: init-zabbix-db
-        image: postgres:latest
-        command: ["/bin/sh", "-c"]
-        args:
-        - |
-          if [ -f /var/lib/postgresql/data/postmaster.pid ]; then
-            rm /var/lib/postgresql/data/postmaster.pid
-          fi
-          sudo -u postgres createuser --pwprompt zabbix
-          sudo -u postgres createdb -O zabbix -E Unicode -T template0 zabbix
-          zcat /usr/share/doc/zabbix-server-pgsql/create.sql.gz | sudo -u zabbix psql zabbix
-          echo "DBName=zabbix" >> /etc/zabbix/zabbix_server.conf
-          echo "DBUser=zabbix" >> /etc/zabbix/zabbix_server.conf
-          echo "DBPassword=zabbix" >> /etc/zabbix/zabbix_server.conf
-        volumeMounts:
-        - name: zabbix-conf
-          mountPath: /etc/zabbix
-        - name: postgres-data
-          mountPath: /var/lib/postgresql/data
       containers:
       - name: zabbix-db
         image: postgres:latest
         env:
         - name: POSTGRES_USER
-          value: "zabbix"
+          valueFrom:
+            secretKeyRef:
+              name: zabbix-db-secrets
+              key: POSTGRES_USER
         - name: POSTGRES_PASSWORD
-          value: "zabbix"
+          valueFrom:
+            secretKeyRef:
+              name: zabbix-db-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 5432
         volumeMounts:
         - name: postgres-data
           mountPath: /var/lib/postgresql/data
-#        resources:
-#          requests:
-#            memory: "128Mi"
-#            cpu: "100m"
-#          limits:
-#            memory: "512Mi"
-#            cpu: "500m"
+        livenessProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 6
+        readinessProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
       volumes:
-      - name: zabbix-conf
-        emptyDir: {}
       - name: postgres-data
+        persistentVolumeClaim:
+          claimName: zabbix-db-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zabbix-db-pvc
+  labels:
+    app: zabbix-db
+spec:
+  accessModes:
+    - ReadWriteOnce # Adapte se seu storage suporta ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi # Ajuste o tamanho conforme sua necessidade de dados do Zabbix
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: zabbix-db-internal
+  labels:
+    app: zabbix-db
 spec:
-  ports:
-    - port: 5432
-      targetPort: 5432
   selector:
     app: zabbix-db
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: zabbix-db-external
-spec:
-  type: NodePort
   ports:
-    - port: 5432
-      targetPort: 5432
-      nodePort: 30003
-  selector:
-    app: zabbix-db
+  - port: 5432
+    targetPort: 5432

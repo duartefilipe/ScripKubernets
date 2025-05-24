@@ -1,27 +1,10 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: zabbix-frontend
-spec:
-  ports:
-    - name: http
-      port: 80
-      targetPort: 8080
-      nodePort: 30000
-    - name: https
-      port: 443
-      targetPort: 8443
-      nodePort: 30002
-  selector:
-    app: zabbix-frontend
-  type: NodePort
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zabbix-frontend
+  labels:
+    app: zabbix-frontend
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: zabbix-frontend
@@ -39,13 +22,58 @@ spec:
         - name: DB_SERVER_HOST
           value: "zabbix-db-internal"
         - name: POSTGRES_USER
-          value: "zabbix"
+          valueFrom:
+            secretKeyRef:
+              name: zabbix-db-secrets
+              key: POSTGRES_USER
         - name: POSTGRES_PASSWORD
-          value: "zabbix"
-#        resources:
-#          requests:
-#            memory: "128Mi"
-#            cpu: "100m"
-#          limits:
-#            memory: "256Mi"
-#            cpu: "200m"
+          valueFrom:
+            secretKeyRef:
+              name: zabbix-db-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 8080 # HTTP
+        - containerPort: 8443 # HTTPS
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 6
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 15
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "400m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zabbix-frontend
+  labels:
+    app: zabbix-frontend
+spec:
+  selector:
+    app: zabbix-frontend
+  type: NodePort
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+    nodePort: 30000 # Acesse em http://<IP_DO_NODE>:30000
+  - name: https
+    port: 443
+    targetPort: 8443
+    nodePort: 30002 # Acesse em https://<IP_DO_NODE>:30002

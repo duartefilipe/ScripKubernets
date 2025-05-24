@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: pihole-deployment
 spec:
-  replicas: 1  # Defina o número desejado de réplicas
+  replicas: 1
   selector:
     matchLabels:
       app: pihole
@@ -12,21 +12,50 @@ spec:
       labels:
         app: pihole
     spec:
+      dnsPolicy: "None"
+      dnsConfig:
+        nameservers:
+          - 8.8.8.8  # DNS externos para a inicialização do pod
+          - 1.1.1.1
+      # --------------------------------
       containers:
       - name: pihole
         image: pihole/pihole:latest
         env:
+        - name: TZ
+          value: "America/Sao_Paulo"
         - name: WEBPASSWORD
-          value: "Eunaoseiasenha22"  # Defina sua senha aqui
+          value: "Eunaoseiasenha22"
+        - name: DNSMASQ_LISTENING
+          value: "all"
+        - name: FTLCONF_LOCAL_IPV4
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: DNS1
+          value: "8.8.8.8"
+        - name: DNS2
+          value: "1.1.1.1"
         ports:
-        - containerPort: 80
+        - name: web
+          containerPort: 80
+        - name: dns
+          containerPort: 53
+          protocol: UDP
+        - name: dns-tcp
+          containerPort: 53
+          protocol: TCP
         resources:
           requests:
             cpu: "50m"
-            memory: "20Mi"
+            memory: "50Mi"
           limits:
-            cpu: "50m"
-            memory: "100Mi"
+            cpu: "100m"
+            memory: "200Mi"
+        securityContext:
+          capabilities:
+            add:
+              - NET_ADMIN
 ---
 apiVersion: v1
 kind: Service
@@ -37,7 +66,18 @@ spec:
   selector:
     app: pihole
   ports:
-  - protocol: TCP
-    port: 82
+  - name: web
+    port: 80
     targetPort: 80
     nodePort: 30004
+    protocol: TCP
+  - name: dns
+    port: 53
+    targetPort: 53
+    nodePort: 30053
+    protocol: UDP
+  - name: dns-tcp
+    port: 53
+    targetPort: 53
+    nodePort: 30054
+    protocol: TCP
